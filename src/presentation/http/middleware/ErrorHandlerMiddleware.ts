@@ -1,6 +1,6 @@
 /**
  * Middleware de gestion des erreurs
- * 
+ *
  * Ce middleware capture toutes les erreurs de l'application
  * et les formate de manière cohérente pour le client
  */
@@ -102,7 +102,10 @@ interface ErrorResponse {
 /**
  * Formater l'erreur pour l'envoyer au client
  */
-function formatErrorResponse(error: AppError | Error, includeStack: boolean = false): ErrorResponse {
+function formatErrorResponse(
+  error: AppError | Error,
+  includeStack: boolean = false
+): ErrorResponse {
   const isAppError = error instanceof AppError;
 
   const response: ErrorResponse = {
@@ -162,7 +165,7 @@ export function notFoundHandler(req: Request, _res: Response, next: NextFunction
 /**
  * Wrapper pour les fonctions async
  * Évite d'avoir à faire try/catch dans chaque route
- * 
+ *
  * Utilisation:
  * router.get('/users', asyncHandler(async (req, res) => {
  *   const users = await getUsersUseCase.execute();
@@ -185,7 +188,7 @@ export function setupGlobalErrorHandlers(): void {
       error: reason.message,
       stack: reason.stack,
     });
-    
+
     // En production, on pourrait vouloir arrêter le processus
     if (config.NODE_ENV === 'production') {
       process.exit(1);
@@ -198,7 +201,7 @@ export function setupGlobalErrorHandlers(): void {
       error: error.message,
       stack: error.stack,
     });
-    
+
     // Arrêter le processus car l'état de l'application est incertain
     process.exit(1);
   });

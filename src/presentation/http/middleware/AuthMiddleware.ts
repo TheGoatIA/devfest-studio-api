@@ -1,6 +1,6 @@
 /**
  * Middleware d'Authentification
- * 
+ *
  * Protège les routes en vérifiant que l'utilisateur est authentifié
  * Utilise le ValidateSessionUseCase pour valider la session
  */
@@ -24,7 +24,7 @@ export interface AuthenticatedRequest extends Request {
 /**
  * Middleware d'authentification
  * À utiliser sur toutes les routes qui nécessitent une authentification
- * 
+ *
  * Utilisation:
  * router.get('/protected', authenticate, (req: AuthenticatedRequest, res) => {
  *   const userId = req.user.userId;
@@ -41,7 +41,7 @@ export async function authenticate(
     const token = extractToken(req);
 
     if (!token) {
-      logger.warn('Tentative d\'accès sans token', {
+      logger.warn("Tentative d'accès sans token", {
         url: req.url,
         method: req.method,
         ip: req.ip,
@@ -51,7 +51,7 @@ export async function authenticate(
         success: false,
         error: {
           code: 'MISSING_TOKEN',
-          message: 'Token d\'authentification requis',
+          message: "Token d'authentification requis",
         },
       });
       return;
@@ -80,7 +80,7 @@ export async function authenticate(
   } catch (error) {
     // Erreur d'authentification
     if (error instanceof AuthenticationError) {
-      logger.warn('Échec d\'authentification', {
+      logger.warn("Échec d'authentification", {
         error: error.message,
         url: req.url,
         method: req.method,
@@ -98,7 +98,7 @@ export async function authenticate(
     }
 
     // Autre erreur
-    logger.error('Erreur lors de l\'authentification', {
+    logger.error("Erreur lors de l'authentification", {
       error,
       url: req.url,
     });
@@ -107,7 +107,7 @@ export async function authenticate(
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: 'Erreur lors de l\'authentification',
+        message: "Erreur lors de l'authentification",
       },
     });
   }
@@ -116,7 +116,7 @@ export async function authenticate(
 /**
  * Middleware d'authentification optionnel
  * Authentifie si un token est présent, sinon continue quand même
- * 
+ *
  * Utilisation:
  * router.get('/optional', optionalAuth, (req: AuthenticatedRequest, res) => {
  *   if (req.user) {
@@ -160,11 +160,11 @@ export async function optionalAuth(
 
 /**
  * Extraire le token de l'header Authorization
- * 
+ *
  * Formats supportés:
  * - Authorization: Bearer <token>
  * - Authorization: <token>
- * 
+ *
  * @param req - Requête Express
  * @returns Token ou null
  */
@@ -186,7 +186,7 @@ function extractToken(req: Request): string | null {
 
 /**
  * Middleware pour vérifier les permissions (à implémenter selon vos besoins)
- * 
+ *
  * Exemple:
  * function requirePremium(req: AuthenticatedRequest, res: Response, next: NextFunction) {
  *   if (!req.user.isPremium) {

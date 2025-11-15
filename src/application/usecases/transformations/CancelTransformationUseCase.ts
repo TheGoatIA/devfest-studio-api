@@ -21,9 +21,7 @@ export interface CancelTransformationOutput {
 export class CancelTransformationUseCase {
   constructor(private transformationRepository: ITransformationRepository) {}
 
-  async execute(
-    input: CancelTransformationInput
-  ): Promise<CancelTransformationOutput> {
+  async execute(input: CancelTransformationInput): Promise<CancelTransformationOutput> {
     try {
       const transformation = await this.transformationRepository.findByIdAndUser(
         input.transformationId,
@@ -36,7 +34,7 @@ export class CancelTransformationUseCase {
 
       // Vérifier que la transformation peut être annulée
       if (transformation.processing.status === 'completed') {
-        throw new AppError('Impossible d\'annuler une transformation terminée', 409);
+        throw new AppError("Impossible d'annuler une transformation terminée", 409);
       }
 
       if (transformation.processing.status === 'cancelled') {
@@ -44,10 +42,7 @@ export class CancelTransformationUseCase {
       }
 
       // Mettre à jour le statut
-      await this.transformationRepository.updateStatus(
-        input.transformationId,
-        'cancelled'
-      );
+      await this.transformationRepository.updateStatus(input.transformationId, 'cancelled');
 
       logger.info('🚫 Transformation annulée', {
         transformationId: input.transformationId,

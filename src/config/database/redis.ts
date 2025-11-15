@@ -1,6 +1,6 @@
 /**
  * Configuration et connexion à Redis
- * 
+ *
  * Ce fichier gère :
  * - La connexion au serveur Redis
  * - Le cache des données fréquemment utilisées
@@ -38,7 +38,9 @@ class RedisConnection {
           reconnectStrategy: (retries) => {
             // Stratégie de reconnexion exponentielle
             if (retries > this.maxRetries) {
-              logger.warn('⚠️  Nombre maximum de tentatives Redis atteint - Mode sans cache activé');
+              logger.warn(
+                '⚠️  Nombre maximum de tentatives Redis atteint - Mode sans cache activé'
+              );
               return new Error('Trop de tentatives de reconnexion');
             }
             const delay = Math.min(retries * 100, 3000);
@@ -73,7 +75,6 @@ class RedisConnection {
         const version = info.match(/redis_version:([\d.]+)/)?.[1];
         logger.debug('📊 Redis version:', { version });
       }
-
     } catch (error) {
       this.isConnected = false;
       this.connectionAttempts++;
@@ -93,8 +94,10 @@ class RedisConnection {
           this.connect();
         }, retryDelay);
       } else {
-        logger.warn('⚠️  Redis non disponible - L\'application continuera sans cache');
-        logger.info('ℹ️  Les fonctionnalités suivantes seront désactivées: cache de sessions, rate limiting');
+        logger.warn("⚠️  Redis non disponible - L'application continuera sans cache");
+        logger.info(
+          'ℹ️  Les fonctionnalités suivantes seront désactivées: cache de sessions, rate limiting'
+        );
 
         // Ne pas lancer d'erreur - l'application continue sans Redis
         this.isConnected = false;
@@ -166,7 +169,7 @@ class RedisConnection {
    */
   async disconnect(): Promise<void> {
     if (!this.isConnected) {
-      logger.warn('⚠️  Redis n\'est pas connecté');
+      logger.warn("⚠️  Redis n'est pas connecté");
       return;
     }
 
@@ -177,7 +180,7 @@ class RedisConnection {
       if (this.subscriber) {
         await this.subscriber.quit();
       }
-      
+
       this.isConnected = false;
       logger.info('👋 Déconnexion de Redis réussie');
     } catch (error) {
@@ -206,7 +209,7 @@ class RedisConnection {
     try {
       const dbSize = await this.client.dbSize();
       const memory = await this.client.info('memory');
-      
+
       // Parser la mémoire utilisée
       const usedMemoryMatch = memory.match(/used_memory_human:(.+)/);
       const usedMemory = usedMemoryMatch ? usedMemoryMatch[1].trim() : 'N/A';
@@ -233,7 +236,7 @@ class RedisConnection {
     }
 
     if (!this.client) {
-      throw new Error('Redis client n\'est pas initialisé');
+      throw new Error("Redis client n'est pas initialisé");
     }
 
     try {

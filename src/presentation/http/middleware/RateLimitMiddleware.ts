@@ -48,13 +48,9 @@ export class RateLimitMiddleware {
       }
 
       try {
-        const key = config.keyGenerator
-          ? config.keyGenerator(req)
-          : this.defaultKeyGenerator(req);
+        const key = config.keyGenerator ? config.keyGenerator(req) : this.defaultKeyGenerator(req);
 
-        const windowKey = `ratelimit:${key}:${Math.floor(
-          Date.now() / config.windowMs
-        )}`;
+        const windowKey = `ratelimit:${key}:${Math.floor(Date.now() / config.windowMs)}`;
 
         // Incrémenter le compteur
         const currentCount = await this.redisClient.incr(windowKey);
@@ -67,8 +63,7 @@ export class RateLimitMiddleware {
         // Vérifier la limite
         if (currentCount > config.maxRequests) {
           const resetTime =
-            Math.ceil(Date.now() / config.windowMs) * config.windowMs +
-            config.windowMs;
+            Math.ceil(Date.now() / config.windowMs) * config.windowMs + config.windowMs;
 
           logger.warn('⚠️  Rate limit exceeded', {
             key,
@@ -81,8 +76,7 @@ export class RateLimitMiddleware {
             success: false,
             error: {
               code: 'RATE_LIMIT_EXCEEDED',
-              message:
-                config.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+              message: config.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
               retry_after: Math.ceil((resetTime - Date.now()) / 1000),
               limit: {
                 window: `${config.windowMs / 1000}s`,
@@ -99,10 +93,7 @@ export class RateLimitMiddleware {
           'X-RateLimit-Remaining',
           Math.max(0, config.maxRequests - currentCount).toString()
         );
-        res.setHeader(
-          'X-RateLimit-Reset',
-          Math.ceil(Date.now() / config.windowMs + 1).toString()
-        );
+        res.setHeader('X-RateLimit-Reset', Math.ceil(Date.now() / config.windowMs + 1).toString());
 
         next();
       } catch (error: any) {
@@ -128,7 +119,7 @@ export class RateLimitMiddleware {
     return {
       windowMs: 15 * 60 * 1000, // 15 minutes
       maxRequests: 10,
-      message: 'Trop de requêtes d\'upload. Veuillez réessayer dans 15 minutes.',
+      message: "Trop de requêtes d'upload. Veuillez réessayer dans 15 minutes.",
     };
   }
 
@@ -136,8 +127,7 @@ export class RateLimitMiddleware {
     return {
       windowMs: 15 * 60 * 1000, // 15 minutes
       maxRequests: 5,
-      message:
-        'Trop de demandes de transformation. Veuillez réessayer dans 15 minutes.',
+      message: 'Trop de demandes de transformation. Veuillez réessayer dans 15 minutes.',
     };
   }
 
@@ -153,8 +143,7 @@ export class RateLimitMiddleware {
     return {
       windowMs: 15 * 60 * 1000, // 15 minutes
       maxRequests: 10,
-      message:
-        'Trop de tentatives de connexion. Veuillez réessayer dans 15 minutes.',
+      message: 'Trop de tentatives de connexion. Veuillez réessayer dans 15 minutes.',
       keyGenerator: (req: Request) => req.ip || 'unknown',
     };
   }

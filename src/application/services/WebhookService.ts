@@ -137,7 +137,10 @@ export class WebhookService extends EventEmitter {
   /**
    * Envoyer un événement à un subscriber
    */
-  private async sendToSubscriber(subscriber: WebhookSubscriber, event: WebhookEvent): Promise<void> {
+  private async sendToSubscriber(
+    subscriber: WebhookSubscriber,
+    event: WebhookEvent
+  ): Promise<void> {
     try {
       logger.debug('📤 Envoi webhook', {
         subscriberId: subscriber.id,
@@ -202,27 +205,44 @@ export class WebhookService extends EventEmitter {
    */
 
   async photoUploaded(photoId: string, userId: string, photoUrl: string): Promise<void> {
-    await this.emitWebhook('photo.uploaded', {
-      photoId,
-      url: photoUrl,
-      userId,
-    }, userId);
+    await this.emitWebhook(
+      'photo.uploaded',
+      {
+        photoId,
+        url: photoUrl,
+        userId,
+      },
+      userId
+    );
   }
 
   async photoDeleted(photoId: string, userId: string): Promise<void> {
-    await this.emitWebhook('photo.deleted', {
-      photoId,
-      userId,
-    }, userId);
+    await this.emitWebhook(
+      'photo.deleted',
+      {
+        photoId,
+        userId,
+      },
+      userId
+    );
   }
 
-  async transformationStarted(transformationId: string, userId: string, photoId: string, styleId: string): Promise<void> {
-    await this.emitWebhook('transformation.started', {
-      transformationId,
-      photoId,
-      styleId,
-      userId,
-    }, userId);
+  async transformationStarted(
+    transformationId: string,
+    userId: string,
+    photoId: string,
+    styleId: string
+  ): Promise<void> {
+    await this.emitWebhook(
+      'transformation.started',
+      {
+        transformationId,
+        photoId,
+        styleId,
+        userId,
+      },
+      userId
+    );
   }
 
   async transformationCompleted(
@@ -232,21 +252,33 @@ export class WebhookService extends EventEmitter {
     styleId: string,
     resultUrl: string
   ): Promise<void> {
-    await this.emitWebhook('transformation.completed', {
-      transformationId,
-      photoId,
-      styleId,
-      resultUrl,
-      userId,
-    }, userId);
+    await this.emitWebhook(
+      'transformation.completed',
+      {
+        transformationId,
+        photoId,
+        styleId,
+        resultUrl,
+        userId,
+      },
+      userId
+    );
   }
 
-  async transformationFailed(transformationId: string, userId: string, error: string): Promise<void> {
-    await this.emitWebhook('transformation.failed', {
-      transformationId,
-      error,
-      userId,
-    }, userId);
+  async transformationFailed(
+    transformationId: string,
+    userId: string,
+    error: string
+  ): Promise<void> {
+    await this.emitWebhook(
+      'transformation.failed',
+      {
+        transformationId,
+        error,
+        userId,
+      },
+      userId
+    );
   }
 
   /**
@@ -257,7 +289,7 @@ export class WebhookService extends EventEmitter {
       subscribersCount: this.subscribers.size,
       queueLength: this.eventQueue.length,
       isProcessing: this.isProcessing,
-      subscribers: Array.from(this.subscribers.values()).map(sub => ({
+      subscribers: Array.from(this.subscribers.values()).map((sub) => ({
         id: sub.id,
         url: sub.url,
         events: sub.events,

@@ -1,6 +1,6 @@
 /**
  * Service JWT - Gestion des JSON Web Tokens
- * 
+ *
  * Ce service gère :
  * - La génération de tokens (access et refresh)
  * - La validation des tokens
@@ -50,7 +50,7 @@ class JWTService {
 
   /**
    * Générer une paire de tokens (access + refresh)
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @param deviceId - ID de l'appareil
    * @param sessionId - ID de la session
@@ -95,7 +95,7 @@ class JWTService {
 
   /**
    * Générer un token JWT
-   * 
+   *
    * @param payload - Données à encoder dans le token
    * @param expiresIn - Durée de validité (ex: '15m', '7d')
    * @returns Token JWT signé
@@ -112,7 +112,7 @@ class JWTService {
 
   /**
    * Vérifier et décoder un token
-   * 
+   *
    * @param token - Token JWT à vérifier
    * @returns Payload décodé si le token est valide
    * @throws AuthenticationError si le token est invalide ou expiré
@@ -150,7 +150,7 @@ class JWTService {
   /**
    * Décoder un token sans le vérifier (attention : non sécurisé)
    * Utile uniquement pour extraire des informations non sensibles
-   * 
+   *
    * @param token - Token JWT à décoder
    * @returns Payload décodé ou null
    */
@@ -166,7 +166,7 @@ class JWTService {
 
   /**
    * Vérifier si un token est expiré sans lever d'exception
-   * 
+   *
    * @param token - Token JWT à vérifier
    * @returns true si expiré, false sinon
    */
@@ -184,7 +184,7 @@ class JWTService {
 
   /**
    * Extraire le userId d'un token (même s'il est expiré)
-   * 
+   *
    * @param token - Token JWT
    * @returns userId ou null
    */
@@ -195,7 +195,7 @@ class JWTService {
 
   /**
    * Extraire le sessionId d'un token
-   * 
+   *
    * @param token - Token JWT
    * @returns sessionId ou null
    */
@@ -206,7 +206,7 @@ class JWTService {
 
   /**
    * Vérifier que le token est bien un access token
-   * 
+   *
    * @param token - Token JWT
    * @returns true si c'est un access token
    */
@@ -217,7 +217,7 @@ class JWTService {
 
   /**
    * Vérifier que le token est bien un refresh token
-   * 
+   *
    * @param token - Token JWT
    * @returns true si c'est un refresh token
    */
@@ -228,7 +228,7 @@ class JWTService {
 
   /**
    * Calculer la date d'expiration à partir d'une durée
-   * 
+   *
    * @param expiresIn - Durée (ex: '15m', '7d')
    * @returns Date d'expiration
    */
@@ -254,7 +254,7 @@ class JWTService {
 
   /**
    * Obtenir le temps restant avant expiration (en secondes)
-   * 
+   *
    * @param token - Token JWT
    * @returns Secondes restantes ou -1 si expiré/invalide
    */
@@ -266,21 +266,21 @@ class JWTService {
 
     const now = Math.floor(Date.now() / 1000);
     const remaining = decoded.exp - now;
-    
+
     return Math.max(0, remaining);
   }
 
   /**
    * Générer un token temporaire pour des actions spéciales
    * (ex: reset password, email verification)
-   * 
+   *
    * @param payload - Données à encoder
    * @param expiresIn - Durée de validité
    * @returns Token temporaire
    */
-  generateTemporaryToken(payload: Record<string, any> ): string {
+  generateTemporaryToken(payload: Record<string, any>): string {
     return jwt.sign(payload, this.secret, {
-      expiresIn: "1h",
+      expiresIn: '1h',
       issuer: 'devfest-studio-api',
       audience: 'devfest-studio-client',
     });
@@ -288,7 +288,7 @@ class JWTService {
 
   /**
    * Vérifier un token temporaire
-   * 
+   *
    * @param token - Token temporaire
    * @returns Payload décodé
    */

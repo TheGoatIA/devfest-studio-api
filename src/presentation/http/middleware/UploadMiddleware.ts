@@ -17,13 +17,7 @@ const fileFilter = (
   callback: FileFilterCallback
 ): void => {
   // Types MIME autorisés
-  const allowedMimeTypes = [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/heic',
-    'image/webp',
-  ];
+  const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/webp'];
 
   if (allowedMimeTypes.includes(file.mimetype)) {
     callback(null, true);

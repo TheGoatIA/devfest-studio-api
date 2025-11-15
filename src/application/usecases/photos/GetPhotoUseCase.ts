@@ -38,10 +38,7 @@ export class GetPhotoUseCase {
   async execute(input: GetPhotoInput): Promise<GetPhotoOutput> {
     try {
       // Récupérer la photo en vérifiant qu'elle appartient à l'utilisateur
-      const photo = await this.photoRepository.findByIdAndUser(
-        input.photoId,
-        input.userId
-      );
+      const photo = await this.photoRepository.findByIdAndUser(input.photoId, input.userId);
 
       if (!photo) {
         throw new NotFoundError('Photo non trouvée');

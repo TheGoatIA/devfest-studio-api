@@ -1,6 +1,6 @@
 /**
  * Index des connexions aux bases de données
- * 
+ *
  * Ce fichier centralise l'export de toutes les connexions
  * et fournit une fonction pour initialiser toutes les bases en une fois
  */
@@ -31,7 +31,7 @@ export async function initializeDatabases(): Promise<void> {
         logger.warn('⚠️  Redis non disponible - Mode sans cache');
       }
     } catch (redisError) {
-      logger.warn('⚠️  Redis non disponible - L\'application continuera sans cache', {
+      logger.warn("⚠️  Redis non disponible - L'application continuera sans cache", {
         error: redisError instanceof Error ? redisError.message : 'Erreur inconnue',
       });
       // Ne pas propager l'erreur - continuer sans Redis
@@ -39,7 +39,7 @@ export async function initializeDatabases(): Promise<void> {
 
     logger.info('✅ Initialisation des bases de données terminée');
   } catch (error) {
-    logger.error('❌ Erreur critique lors de l\'initialisation des bases de données', { error });
+    logger.error("❌ Erreur critique lors de l'initialisation des bases de données", { error });
     throw error;
   }
 }
@@ -62,7 +62,7 @@ export async function closeDatabases(): Promise<void> {
         await redisConnection.disconnect();
         logger.info('✅ Redis déconnecté');
       } else {
-        logger.debug('ℹ️  Redis n\'était pas connecté');
+        logger.debug("ℹ️  Redis n'était pas connecté");
       }
     } catch (redisError) {
       logger.warn('⚠️  Erreur lors de la fermeture de Redis (ignorée)', {

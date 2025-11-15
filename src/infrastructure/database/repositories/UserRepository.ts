@@ -1,6 +1,6 @@
 /**
  * User Repository - Gestion de l'accès aux données des utilisateurs
- * 
+ *
  * Ce repository abstrait toutes les opérations sur la collection User
  * Cela permet de séparer la logique métier de l'accès aux données
  */
@@ -8,7 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { UserModel, IUser } from '../mongodb/models/UserModel';
 import logger from '../../../config/logger';
-import { NotFoundError, ConflictError } from '../../../presentation/http/middleware/ErrorHandlerMiddleware';
+import {
+  NotFoundError,
+  ConflictError,
+} from '../../../presentation/http/middleware/ErrorHandlerMiddleware';
 
 /**
  * DTO pour créer un utilisateur
@@ -40,7 +43,7 @@ export interface UpdatePreferencesDTO {
 export class UserRepository {
   /**
    * Créer un nouvel utilisateur
-   * 
+   *
    * @param data - Données pour créer l'utilisateur
    * @returns Utilisateur créé
    */
@@ -49,7 +52,7 @@ export class UserRepository {
       // Vérifier si l'utilisateur existe déjà
       const existing = await UserModel.findOne({ deviceId: data.deviceId });
       if (existing) {
-        logger.warn('Tentative de création d\'utilisateur existant', { deviceId: data.deviceId });
+        logger.warn("Tentative de création d'utilisateur existant", { deviceId: data.deviceId });
         throw new ConflictError('Un utilisateur existe déjà pour cet appareil');
       }
 
@@ -74,21 +77,21 @@ export class UserRepository {
       if (error instanceof ConflictError) {
         throw error;
       }
-      logger.error('Erreur lors de la création de l\'utilisateur', { error, data });
-      throw new Error('Impossible de créer l\'utilisateur');
+      logger.error("Erreur lors de la création de l'utilisateur", { error, data });
+      throw new Error("Impossible de créer l'utilisateur");
     }
   }
 
   /**
    * Trouver un utilisateur par son ID
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @returns Utilisateur trouvé
    * @throws NotFoundError si non trouvé
    */
   async findById(userId: string): Promise<IUser> {
     const user = await UserModel.findOne({ userId, status: 'active' });
-    
+
     if (!user) {
       throw new NotFoundError('Utilisateur');
     }
@@ -98,7 +101,7 @@ export class UserRepository {
 
   /**
    * Trouver un utilisateur par son deviceId
-   * 
+   *
    * @param deviceId - ID de l'appareil
    * @returns Utilisateur trouvé ou null
    */
@@ -110,7 +113,7 @@ export class UserRepository {
    * Trouver ou créer un utilisateur par deviceId
    * Si l'utilisateur existe, le retourner
    * Sinon, le créer
-   * 
+   *
    * @param data - Données pour créer l'utilisateur si nécessaire
    * @returns Utilisateur (existant ou nouveau)
    */
@@ -122,7 +125,7 @@ export class UserRepository {
       if (user) {
         // Utilisateur existant trouvé
         logger.debug('Utilisateur existant trouvé', { userId: user.userId });
-        
+
         // Mettre à jour les infos de l'appareil si elles ont changé
         let updated = false;
         if (user.deviceInfo.appVersion !== data.deviceInfo.appVersion) {
@@ -153,7 +156,7 @@ export class UserRepository {
 
   /**
    * Mettre à jour les préférences d'un utilisateur
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @param preferences - Nouvelles préférences
    * @returns Utilisateur mis à jour
@@ -187,7 +190,7 @@ export class UserRepository {
 
   /**
    * Mettre à jour la dernière activité
-   * 
+   *
    * @param userId - ID de l'utilisateur
    */
   async updateActivity(userId: string): Promise<void> {
@@ -198,7 +201,7 @@ export class UserRepository {
 
   /**
    * Incrémenter le quota de transformations
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @throws RateLimitError si quota atteint
    */
@@ -226,7 +229,7 @@ export class UserRepository {
 
   /**
    * Obtenir les transformations restantes
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @returns Nombre de transformations restantes
    */
@@ -238,7 +241,7 @@ export class UserRepository {
 
   /**
    * Mettre à jour les statistiques
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @param stats - Statistiques à mettre à jour
    */
@@ -271,13 +274,13 @@ export class UserRepository {
 
   /**
    * Obtenir les statistiques d'un utilisateur
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @returns Statistiques
    */
   async getStats(userId: string) {
     const user = await this.findById(userId);
-    
+
     return {
       totalTransformations: user.stats.totalTransformations,
       completedTransformations: user.stats.completedTransformations,
@@ -298,7 +301,7 @@ export class UserRepository {
 
   /**
    * Suspendre un utilisateur
-   * 
+   *
    * @param userId - ID de l'utilisateur
    */
   async suspend(userId: string): Promise<void> {
@@ -311,7 +314,7 @@ export class UserRepository {
 
   /**
    * Réactiver un utilisateur
-   * 
+   *
    * @param userId - ID de l'utilisateur
    */
   async activate(userId: string): Promise<void> {
@@ -328,7 +331,7 @@ export class UserRepository {
 
   /**
    * Supprimer un utilisateur (soft delete)
-   * 
+   *
    * @param userId - ID de l'utilisateur
    */
   async delete(userId: string): Promise<void> {

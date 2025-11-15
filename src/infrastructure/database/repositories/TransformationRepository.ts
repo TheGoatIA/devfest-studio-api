@@ -3,7 +3,10 @@
  */
 
 import { ITransformationRepository } from '../../../core/interfaces/repositories/ITransformationRepository';
-import { TransformationModel, ITransformationDocument } from '../mongodb/models/TransformationModel';
+import {
+  TransformationModel,
+  ITransformationDocument,
+} from '../mongodb/models/TransformationModel';
 import logger from '../../../config/logger';
 
 export class TransformationRepository implements ITransformationRepository {
@@ -75,13 +78,7 @@ export class TransformationRepository implements ITransformationRepository {
     } = {}
   ): Promise<{ transformations: ITransformationDocument[]; total: number }> {
     try {
-      const {
-        limit = 20,
-        offset = 0,
-        status,
-        sortBy = 'createdAt',
-        sortOrder = 'desc',
-      } = options;
+      const { limit = 20, offset = 0, status, sortBy = 'createdAt', sortOrder = 'desc' } = options;
 
       const filter: any = { userId };
       if (status) {
@@ -159,11 +156,7 @@ export class TransformationRepository implements ITransformationRepository {
   /**
    * Mettre à jour le statut
    */
-  async updateStatus(
-    transformationId: string,
-    status: string,
-    progress?: number
-  ): Promise<void> {
+  async updateStatus(transformationId: string, status: string, progress?: number): Promise<void> {
     try {
       const updates: any = {
         'processing.status': status,
@@ -257,9 +250,7 @@ export class TransformationRepository implements ITransformationRepository {
   /**
    * Récupérer les transformations récentes (pour le dashboard)
    */
-  async findRecent(
-    limit: number = 50
-  ): Promise<ITransformationDocument[]> {
+  async findRecent(limit: number = 50): Promise<ITransformationDocument[]> {
     try {
       const transformations = await TransformationModel.find({
         'processing.status': 'completed',

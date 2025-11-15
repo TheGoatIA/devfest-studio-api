@@ -146,13 +146,7 @@ export class UploadPhotoUseCase {
     }
 
     // Vérifier le type MIME
-    const allowedTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/heic',
-      'image/webp',
-    ];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/webp'];
 
     if (!allowedTypes.includes(file.mimetype)) {
       throw new AppError(
@@ -173,7 +167,7 @@ export class UploadPhotoUseCase {
       logger.error('❌ Erreur extraction métadonnées image', {
         error: error.message,
       });
-      throw new AppError('Impossible de lire les métadonnées de l\'image', 422);
+      throw new AppError("Impossible de lire les métadonnées de l'image", 422);
     }
   }
 }

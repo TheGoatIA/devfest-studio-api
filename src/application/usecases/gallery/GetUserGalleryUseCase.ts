@@ -88,9 +88,7 @@ export class GetUserGalleryUseCase {
       // Filtrer par favoris si demandé
       let filteredTransformations = transformations;
       if (input.filters?.favoritesOnly) {
-        filteredTransformations = transformations.filter(
-          (t) => t.social.isFavorite
-        );
+        filteredTransformations = transformations.filter((t) => t.social.isFavorite);
       }
 
       // Mapper les données
@@ -144,10 +142,7 @@ export class GetUserGalleryUseCase {
         userId: input.userId,
       });
 
-      throw new AppError(
-        'Erreur lors de la récupération de la galerie',
-        500
-      );
+      throw new AppError('Erreur lors de la récupération de la galerie', 500);
     }
   }
 }

@@ -80,7 +80,7 @@ export class StorageService implements IStorageService {
             error: error.message,
             filename,
           });
-          reject(new AppError('Échec de l\'upload du fichier', 500));
+          reject(new AppError("Échec de l'upload du fichier", 500));
         });
 
         stream.on('finish', () => {
@@ -138,7 +138,7 @@ export class StorageService implements IStorageService {
         error: error.message,
         filePath,
       });
-      throw new AppError('Erreur lors de la génération de l\'URL signée', 500);
+      throw new AppError("Erreur lors de la génération de l'URL signée", 500);
     }
   }
 
@@ -220,12 +220,15 @@ export class StorageService implements IStorageService {
         updatedAt: new Date(metadata.updated || Date.now()),
         customMetadata: metadata.metadata
           ? Object.fromEntries(
-              Object.entries(metadata.metadata).reduce((acc, [key, value]) => {
-                if (value !== null && value !== undefined) {
-                  acc.push([key, String(value)]);
-                }
-                return acc;
-              }, [] as [string, string][])
+              Object.entries(metadata.metadata).reduce(
+                (acc, [key, value]) => {
+                  if (value !== null && value !== undefined) {
+                    acc.push([key, String(value)]);
+                  }
+                  return acc;
+                },
+                [] as [string, string][]
+              )
             )
           : undefined,
       };

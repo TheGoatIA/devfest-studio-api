@@ -21,9 +21,7 @@ export interface RemoveFromFavoritesOutput {
 export class RemoveFromFavoritesUseCase {
   constructor(private transformationRepository: ITransformationRepository) {}
 
-  async execute(
-    input: RemoveFromFavoritesInput
-  ): Promise<RemoveFromFavoritesOutput> {
+  async execute(input: RemoveFromFavoritesInput): Promise<RemoveFromFavoritesOutput> {
     try {
       // Vérifier que la transformation existe et appartient à l'utilisateur
       const transformation = await this.transformationRepository.findByIdAndUser(

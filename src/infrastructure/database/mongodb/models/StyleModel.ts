@@ -199,7 +199,7 @@ StyleSchema.methods.updatePopularity = async function (): Promise<void> {
   // Calculer la popularité basée sur l'usage et les ratings
   const usageScore = Math.min(this.metrics.usageCount / 1000, 1);
   const ratingScore = this.metrics.averageRating / 5;
-  this.metrics.popularity = (usageScore * 0.7 + ratingScore * 0.3);
+  this.metrics.popularity = usageScore * 0.7 + ratingScore * 0.3;
   await this.save();
 };
 

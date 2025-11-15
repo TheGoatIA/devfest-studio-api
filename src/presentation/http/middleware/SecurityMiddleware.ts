@@ -1,6 +1,6 @@
 /**
  * Middleware de sécurité
- * 
+ *
  * Configure les headers de sécurité HTTP et CORS
  * pour protéger l'application contre les attaques courantes
  */
@@ -44,13 +44,7 @@ const corsOptions: cors.CorsOptions = {
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
   // Headers autorisés
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Request-ID',
-    'X-Device-ID',
-    'X-App-Version',
-  ],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-Device-ID', 'X-App-Version'],
 
   // Headers exposés au client
   exposedHeaders: [
@@ -162,7 +156,7 @@ export function additionalSecurityHeaders(_req: any, res: any, next: any): void 
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  
+
   // En production, forcer HTTPS
   if (config.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
@@ -187,7 +181,7 @@ export function validateUploadOrigin(req: any, res: any, next: any): void {
   // Vérifier que la requête vient d'une origine autorisée
   // Si ni origin ni referer, bloquer (probable tentative de script direct)
   if (!origin && !referer) {
-    logger.warn('⚠️  Tentative d\'upload sans origin/referer', {
+    logger.warn("⚠️  Tentative d'upload sans origin/referer", {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
     });
@@ -245,7 +239,7 @@ function parseSize(size: string): number {
   };
 
   const match = size.toLowerCase().match(/^(\d+(?:\.\d+)?)\s*([a-z]+)$/);
-  
+
   if (!match) {
     return parseInt(size, 10);
   }

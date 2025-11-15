@@ -89,9 +89,6 @@ router.delete(
  * Query params:
  *   limit?: number (default: 50)
  */
-router.get(
-  '/transformations/recent',
-  transformationController.getRecentTransformations
-);
+router.get('/transformations/recent', transformationController.getRecentTransformations);
 
 export default router;

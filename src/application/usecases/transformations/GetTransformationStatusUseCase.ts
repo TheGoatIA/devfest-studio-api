@@ -30,9 +30,7 @@ export interface GetTransformationStatusOutput {
 export class GetTransformationStatusUseCase {
   constructor(private transformationRepository: ITransformationRepository) {}
 
-  async execute(
-    input: GetTransformationStatusInput
-  ): Promise<GetTransformationStatusOutput> {
+  async execute(input: GetTransformationStatusInput): Promise<GetTransformationStatusOutput> {
     try {
       const transformation = await this.transformationRepository.findByIdAndUser(
         input.transformationId,
@@ -74,10 +72,7 @@ export class GetTransformationStatusUseCase {
         transformationId: input.transformationId,
       });
 
-      throw new AppError(
-        'Erreur lors de la récupération du statut de la transformation',
-        500
-      );
+      throw new AppError('Erreur lors de la récupération du statut de la transformation', 500);
     }
   }
 }

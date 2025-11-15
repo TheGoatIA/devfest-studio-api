@@ -39,10 +39,7 @@ export class AIService implements IAIService {
       });
 
       // 1. Préparer l'image
-      const processedImage = await this.prepareImage(
-        input.imageBuffer,
-        input.quality
-      );
+      const processedImage = await this.prepareImage(input.imageBuffer, input.quality);
 
       // 2. Générer le prompt de transformation
       const prompt = this.generateTransformationPrompt(input.style, input.options);
@@ -58,9 +55,7 @@ export class AIService implements IAIService {
       const transformedImage = geminiResponse.imageBuffer;
 
       // 5. Analyser l'image transformée (en utilisant les métadonnées)
-      const analysis = await this.parseAnalysisFromMetadata(
-        geminiResponse.metadata
-      );
+      const analysis = await this.parseAnalysisFromMetadata(geminiResponse.metadata);
 
       // 6. Calculer les métriques
       const processingTime = Date.now() - startTime;
@@ -86,10 +81,7 @@ export class AIService implements IAIService {
       logger.error('❌ Erreur transformation image', {
         error: error.message,
       });
-      throw new AppError(
-        `Erreur lors de la transformation: ${error.message}`,
-        500
-      );
+      throw new AppError(`Erreur lors de la transformation: ${error.message}`, 500);
     }
   }
 
@@ -98,7 +90,7 @@ export class AIService implements IAIService {
    */
   async analyzeImage(imageBuffer: Buffer): Promise<ImageAnalysis> {
     try {
-      logger.info('🔍 Analyse d\'image en cours...');
+      logger.info("🔍 Analyse d'image en cours...");
 
       const response = await this.geminiClient.analyzeImage(imageBuffer);
 
@@ -119,20 +111,14 @@ export class AIService implements IAIService {
   /**
    * Valide un style personnalisé
    */
-  async validateCustomStyle(
-    description: string,
-    language: string
-  ): Promise<StyleValidation> {
+  async validateCustomStyle(description: string, language: string): Promise<StyleValidation> {
     try {
       logger.info('✅ Validation style personnalisé', {
         descriptionLength: description.length,
         language,
       });
 
-      const result = await this.geminiClient.validateStyleDescription(
-        description,
-        language
-      );
+      const result = await this.geminiClient.validateStyleDescription(description, language);
 
       // Estimer le temps de traitement basé sur la complexité
       let estimatedTime = 30; // secondes
@@ -197,10 +183,7 @@ export class AIService implements IAIService {
 
       return processed;
     } catch (error: any) {
-      throw new AppError(
-        `Erreur lors de la préparation de l'image: ${error.message}`,
-        500
-      );
+      throw new AppError(`Erreur lors de la préparation de l'image: ${error.message}`, 500);
     }
   }
 
@@ -234,10 +217,7 @@ export class AIService implements IAIService {
   /**
    * Génère le prompt de transformation
    */
-  private generateTransformationPrompt(
-    style: IStyleDocument | any,
-    _options?: any
-  ): string {
+  private generateTransformationPrompt(style: IStyleDocument | any, _options?: any): string {
     if ('geminiConfig' in style) {
       // Style prédéfini
       return style.geminiConfig.prompt;

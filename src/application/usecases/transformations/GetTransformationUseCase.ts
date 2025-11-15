@@ -140,10 +140,7 @@ export class GetTransformationUseCase {
         transformationId: input.transformationId,
       });
 
-      throw new AppError(
-        'Erreur lors de la récupération de la transformation',
-        500
-      );
+      throw new AppError('Erreur lors de la récupération de la transformation', 500);
     }
   }
 }

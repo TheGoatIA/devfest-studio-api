@@ -19,9 +19,7 @@ export class GalleryController {
 
     this.getUserGalleryUseCase = new GetUserGalleryUseCase(transformationRepository);
     this.addToFavoritesUseCase = new AddToFavoritesUseCase(transformationRepository);
-    this.removeFromFavoritesUseCase = new RemoveFromFavoritesUseCase(
-      transformationRepository
-    );
+    this.removeFromFavoritesUseCase = new RemoveFromFavoritesUseCase(transformationRepository);
   }
 
   /**

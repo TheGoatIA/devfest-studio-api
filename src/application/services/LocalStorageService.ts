@@ -149,7 +149,10 @@ export class LocalStorageService implements IStorageService {
       // Tenter de supprimer la miniature si elle existe
       const dirname = path.dirname(filePath);
       const basename = path.basename(filePath);
-      const thumbnailPath = path.join(dirname.replace('originals', 'thumbnails').replace('results', 'thumbnails'), `thumb_${basename}`);
+      const thumbnailPath = path.join(
+        dirname.replace('originals', 'thumbnails').replace('results', 'thumbnails'),
+        `thumb_${basename}`
+      );
       const thumbnailAbsolutePath = path.join(this.uploadsDir, thumbnailPath);
 
       try {
@@ -263,9 +266,9 @@ export class LocalStorageService implements IStorageService {
 
       // Filtrer et limiter les résultats
       return files
-        .filter(file => !file.startsWith('.'))
+        .filter((file) => !file.startsWith('.'))
         .slice(0, maxResults)
-        .map(file => path.join(prefix, file));
+        .map((file) => path.join(prefix, file));
     } catch (error) {
       logger.error('❌ Erreur listage fichiers', { error, prefix });
       return [];
@@ -291,7 +294,11 @@ export class LocalStorageService implements IStorageService {
   /**
    * Obtenir le chemin relatif d'un fichier
    */
-  private getRelativePath(filename: string, type: FileMetadata['type'], isThumbnail: boolean = false): string {
+  private getRelativePath(
+    filename: string,
+    type: FileMetadata['type'],
+    isThumbnail: boolean = false
+  ): string {
     let basePath = '';
 
     if (type === 'photo') {

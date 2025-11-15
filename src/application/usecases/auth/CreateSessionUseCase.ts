@@ -1,6 +1,6 @@
 /**
  * Use Case: Créer une Session
- * 
+ *
  * Gère la création d'une nouvelle session pour un utilisateur
  * Processus:
  * 1. Trouver ou créer l'utilisateur
@@ -63,7 +63,7 @@ export interface CreateSessionOutput {
 export class CreateSessionUseCase {
   /**
    * Exécuter le use case
-   * 
+   *
    * @param input - Données d'entrée
    * @returns Session créée avec tokens
    */
@@ -158,7 +158,7 @@ export class CreateSessionUseCase {
 
   /**
    * Mettre en cache les informations de session dans Redis
-   * 
+   *
    * @param sessionId - ID de la session
    * @param data - Données à mettre en cache
    */

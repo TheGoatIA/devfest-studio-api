@@ -74,13 +74,7 @@ export class PhotoRepository implements IPhotoRepository {
     } = {}
   ): Promise<{ photos: IPhotoDocument[]; total: number }> {
     try {
-      const {
-        limit = 20,
-        offset = 0,
-        status,
-        sortBy = 'createdAt',
-        sortOrder = 'desc',
-      } = options;
+      const { limit = 20, offset = 0, status, sortBy = 'createdAt', sortOrder = 'desc' } = options;
 
       // Construire le filtre
       const filter: any = { userId };
@@ -111,10 +105,7 @@ export class PhotoRepository implements IPhotoRepository {
   /**
    * Mettre à jour une photo
    */
-  async update(
-    photoId: string,
-    updates: Partial<IPhotoDocument>
-  ): Promise<IPhotoDocument | null> {
+  async update(photoId: string, updates: Partial<IPhotoDocument>): Promise<IPhotoDocument | null> {
     try {
       const photo = await PhotoModel.findOneAndUpdate(
         { photoId },

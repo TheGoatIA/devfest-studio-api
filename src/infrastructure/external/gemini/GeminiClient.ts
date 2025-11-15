@@ -269,19 +269,13 @@ Critères de validation :
 
       // Préparer l'image
       const base64Image = input.imageBuffer.toString('base64');
-      const imagePart = this.fileToGenerativePart(
-        base64Image,
-        input.mimeType || 'image/jpeg'
-      );
+      const imagePart = this.fileToGenerativePart(base64Image, input.mimeType || 'image/jpeg');
 
       // Appel au modèle Gemini 2.5 Flash Image avec responseModalities
       const response = await this.genAI.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
-          parts: [
-            imagePart,
-            { text: input.prompt },
-          ],
+          parts: [imagePart, { text: input.prompt }],
         },
         config: {
           responseModalities: [Modality.IMAGE],
@@ -328,7 +322,6 @@ Critères de validation :
 
       // Si aucune image n'est trouvée dans la réponse
       throw new AppError('No image data found in the API response.', 500);
-
     } catch (error: any) {
       logger.error('❌ Erreur transformation image Gemini', {
         error: error.message,
@@ -337,7 +330,10 @@ Critères de validation :
 
       // Gérer les différents types d'erreurs
       if (error.message?.includes('API key not valid')) {
-        throw new AppError('The provided API key is not valid. Please check your environment variables.', 403);
+        throw new AppError(
+          'The provided API key is not valid. Please check your environment variables.',
+          403
+        );
       }
 
       if (error.message?.includes('quota')) {

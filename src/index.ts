@@ -1,6 +1,6 @@
 /**
  * Point d'entrée principal de l'application DevFest Studio API
- * 
+ *
  * Ce fichier initialise l'application Express et démarre le serveur
  */
 
@@ -38,7 +38,7 @@ async function startServer(): Promise<void> {
     ╚═══════════════════════════════════════════════════════╝
     `);
 
-    logger.info('🚀 Démarrage de l\'application...');
+    logger.info("🚀 Démarrage de l'application...");
 
     // ========== INITIALISATION DES BASES DE DONNÉES ==========
     logger.info('📦 Initialisation des bases de données...');
@@ -49,7 +49,7 @@ async function startServer(): Promise<void> {
     const app: Application = express();
 
     // ========== MIDDLEWARES GLOBAUX ==========
-    
+
     // 1. Sécurité (Helmet + CORS)
     setupSecurityMiddleware(app);
 
@@ -164,7 +164,7 @@ async function startServer(): Promise<void> {
     // Route de test simple
     app.get('/api/v1/health', async (_req, res) => {
       const dbHealth = checkDatabasesHealth();
-      
+
       res.json({
         success: true,
         message: 'DevFest Studio API fonctionne correctement! 🎉',
@@ -197,7 +197,7 @@ async function startServer(): Promise<void> {
     });
 
     // ========== GESTION DES ERREURS ==========
-    
+
     // Route non trouvée (404) - doit être APRÈS toutes les routes
     app.use(notFoundHandler);
 
@@ -214,7 +214,7 @@ async function startServer(): Promise<void> {
       logger.info(`🌍 Environnement: ${config.NODE_ENV}`);
       logger.info(`📝 Health check: http://${config.HOST}:${config.PORT}/api/v1/health`);
       logger.info(`📚 Documentation API: http://${config.HOST}:${config.PORT}/api/v1/docs`);
-      
+
       // Log supplémentaires en développement
       if (config.NODE_ENV === 'development') {
         logger.info('');
@@ -251,7 +251,6 @@ async function startServer(): Promise<void> {
       });
       process.exit(1);
     });
-
   } catch (error) {
     logger.error('❌ Erreur fatale au démarrage', { error });
     process.exit(1);

@@ -1,6 +1,6 @@
 /**
  * Index des Routes
- * 
+ *
  * Point central pour toutes les routes de l'API
  * Monte tous les routers sur /api/v1
  */
@@ -74,7 +74,7 @@ router.get('/info', (_req, res) => {
     data: {
       name: 'DevFest Studio API',
       version: '1.0.0',
-      description: 'API de transformation d\'images via IA Gemini',
+      description: "API de transformation d'images via IA Gemini",
       endpoints: {
         health: '/api/v1/health',
         auth: '/api/v1/auth',

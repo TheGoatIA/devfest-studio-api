@@ -45,9 +45,7 @@ export class TransformationController {
       styleRepository
     );
 
-    this.cancelTransformationUseCase = new CancelTransformationUseCase(
-      transformationRepository
-    );
+    this.cancelTransformationUseCase = new CancelTransformationUseCase(transformationRepository);
   }
 
   /**
@@ -200,7 +198,7 @@ export class TransformationController {
       const transformations = await transformationRepository.findRecent(limit);
 
       // Formater les données pour le dashboard
-      const formattedData = transformations.map(t => ({
+      const formattedData = transformations.map((t) => ({
         transformationId: t.transformationId,
         styleId: t.styleId || 'custom',
         resultUrl: t.result?.transformedImageUrl || '',

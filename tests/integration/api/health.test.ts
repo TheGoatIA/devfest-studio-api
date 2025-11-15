@@ -14,7 +14,7 @@ describe('Health Endpoint', () => {
     app.use(express.json());
 
     // Ajouter l'endpoint health
-    app.get('/api/v1/health', (req, res) => {
+    app.get('/api/v1/health', (_req, res) => {
       res.json({
         success: true,
         message: 'API en bonne santé',

@@ -68,10 +68,7 @@ export interface IStyleRepository {
   /**
    * Récupérer les styles par catégorie
    */
-  findByCategory(
-    category: string,
-    options?: StyleQueryOptions
-  ): Promise<IStyleDocument[]>;
+  findByCategory(category: string, options?: StyleQueryOptions): Promise<IStyleDocument[]>;
 
   /**
    * Compter les styles

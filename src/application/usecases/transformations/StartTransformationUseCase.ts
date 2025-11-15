@@ -63,10 +63,7 @@ export class StartTransformationUseCase {
       }
 
       // 2. Vérifier que la photo existe et appartient à l'utilisateur
-      const photo = await this.photoRepository.findByIdAndUser(
-        input.photoId,
-        input.userId
-      );
+      const photo = await this.photoRepository.findByIdAndUser(input.photoId, input.userId);
 
       if (!photo) {
         throw new NotFoundError('Photo non trouvée');
@@ -74,7 +71,9 @@ export class StartTransformationUseCase {
 
       // 3. Récupérer le style si styleId fourni
       let style = null;
-      let customStyle: { description: string; language: 'fr'; generatedPrompt: string; validationScore: number } | undefined = undefined;
+      let customStyle:
+        | { description: string; language: 'fr'; generatedPrompt: string; validationScore: number }
+        | undefined = undefined;
 
       if (input.styleId) {
         style = await this.styleRepository.findById(input.styleId);
@@ -86,10 +85,7 @@ export class StartTransformationUseCase {
         await this.styleRepository.incrementUsage(input.styleId);
       } else if (input.customDescription) {
         // Valider le style personnalisé
-        const validation = await this.aiService.validateCustomStyle(
-          input.customDescription,
-          'fr'
-        );
+        const validation = await this.aiService.validateCustomStyle(input.customDescription, 'fr');
 
         if (!validation.isValid) {
           throw new AppError(
@@ -156,11 +152,7 @@ export class StartTransformationUseCase {
       this.processTransformationAsync(transformationId, photo, style || customStyle!, input.userId);
 
       // 7. Calculer le temps estimé
-      const estimatedTime = style
-        ? style.technical.estimatedProcessingTime
-        : customStyle
-        ? 60
-        : 30;
+      const estimatedTime = style ? style.technical.estimatedProcessingTime : customStyle ? 60 : 30;
       const estimatedCompletionTime = new Date(Date.now() + estimatedTime * 1000);
 
       logger.info('🎨 Transformation démarrée', {
@@ -187,10 +179,7 @@ export class StartTransformationUseCase {
         userId: input.userId,
       });
 
-      throw new AppError(
-        `Erreur lors du démarrage de la transformation: ${error.message}`,
-        500
-      );
+      throw new AppError(`Erreur lors du démarrage de la transformation: ${error.message}`, 500);
     }
   }
 
@@ -287,11 +276,7 @@ export class StartTransformationUseCase {
       });
 
       // Émettre l'événement d'échec
-      await webhookService.transformationFailed(
-        transformationId,
-        userId,
-        error.message
-      );
+      await webhookService.transformationFailed(transformationId, userId, error.message);
     }
   }
 }

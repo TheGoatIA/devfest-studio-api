@@ -7,7 +7,10 @@ import { ITransformationDocument } from '../../../infrastructure/database/mongod
 export interface ITransformationRepository {
   create(data: Partial<ITransformationDocument>): Promise<ITransformationDocument>;
   findById(transformationId: string): Promise<ITransformationDocument | null>;
-  findByIdAndUser(transformationId: string, userId: string): Promise<ITransformationDocument | null>;
+  findByIdAndUser(
+    transformationId: string,
+    userId: string
+  ): Promise<ITransformationDocument | null>;
   findByUser(
     userId: string,
     options?: {
@@ -18,7 +21,10 @@ export interface ITransformationRepository {
       sortOrder?: 'asc' | 'desc';
     }
   ): Promise<{ transformations: ITransformationDocument[]; total: number }>;
-  update(transformationId: string, updates: Partial<ITransformationDocument>): Promise<ITransformationDocument | null>;
+  update(
+    transformationId: string,
+    updates: Partial<ITransformationDocument>
+  ): Promise<ITransformationDocument | null>;
   delete(transformationId: string): Promise<boolean>;
   updateStatus(transformationId: string, status: string, progress?: number): Promise<void>;
   markAsCompleted(transformationId: string, result: any): Promise<void>;

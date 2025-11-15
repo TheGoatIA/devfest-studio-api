@@ -4,10 +4,7 @@
 
 import { Router } from 'express';
 import { PhotoController } from '../controllers/PhotoController';
-import {
-  uploadSinglePhoto,
-  handleMulterError,
-} from '../middleware/UploadMiddleware';
+import { uploadSinglePhoto, handleMulterError } from '../middleware/UploadMiddleware';
 import { photoSchemas } from '../validators/schemas/photoSchemas';
 import 'express-async-errors';
 import authenticate from '../middleware/AuthMiddleware';

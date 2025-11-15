@@ -26,11 +26,13 @@ export class EventsController {
     });
 
     // Envoyer un message de connexion
-    res.write(`data: ${JSON.stringify({
-      event: 'connected',
-      message: 'Connexion établie',
-      timestamp: new Date().toISOString(),
-    })}\n\n`);
+    res.write(
+      `data: ${JSON.stringify({
+        event: 'connected',
+        message: 'Connexion établie',
+        timestamp: new Date().toISOString(),
+      })}\n\n`
+    );
 
     // Écouter tous les événements webhook
     const eventHandler = (data: any) => {

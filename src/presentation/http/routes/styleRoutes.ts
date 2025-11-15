@@ -25,11 +25,7 @@ const styleController = new StyleController();
  *   limit: number (default: 20, max: 50)
  *   offset: number (default: 0)
  */
-router.get(
-  '/styles',
-  validate(styleSchemas.getStylesQuery, 'query'),
-  styleController.getStyles
-);
+router.get('/styles', validate(styleSchemas.getStylesQuery, 'query'), styleController.getStyles);
 
 /**
  * GET /api/v1/styles/popular
@@ -39,10 +35,7 @@ router.get(
  * Query params:
  *   limit: number (default: 10)
  */
-router.get(
-  '/styles/popular',
-  styleController.getPopularStyles
-);
+router.get('/styles/popular', styleController.getPopularStyles);
 
 /**
  * GET /api/v1/styles/category/:category

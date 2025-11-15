@@ -1,6 +1,6 @@
 /**
  * Configuration et validation des variables d'environnement
- * 
+ *
  * Ce fichier centralise toutes les variables d'environnement nécessaires
  * et les valide au démarrage de l'application pour éviter les erreurs
  */
@@ -70,8 +70,7 @@ function getRequiredEnv(key: string): string {
   const value = process.env[key];
   if (!value) {
     throw new Error(
-      `❌ Variable d'environnement manquante: ${key}\n` +
-        `Veuillez vérifier votre fichier .env`
+      `❌ Variable d'environnement manquante: ${key}\n` + `Veuillez vérifier votre fichier .env`
     );
   }
   return value;
@@ -111,7 +110,7 @@ function parseBoolean(value: string | undefined, defaultValue: boolean): boolean
  */
 export function validateEnvironment(): EnvironmentConfig {
   try {
-    logger.info('🔍 Validation des variables d\'environnement...');
+    logger.info("🔍 Validation des variables d'environnement...");
 
     // Construction de la configuration
     const config: EnvironmentConfig = {
@@ -141,8 +140,7 @@ export function validateEnvironment(): EnvironmentConfig {
       // Gemini AI
       GEMINI_API_KEY: getRequiredEnv('GEMINI_API_KEY'),
       GEMINI_MODEL: process.env.GEMINI_MODEL || 'gemini-pro-vision',
-      GEMINI_BASE_URL:
-        process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com',
+      GEMINI_BASE_URL: process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com',
 
       // Rate Limiting
       RATE_LIMIT_WINDOW_MS: parseNumber(
@@ -155,10 +153,7 @@ export function validateEnvironment(): EnvironmentConfig {
       ),
 
       // Upload
-      MAX_FILE_SIZE: parseNumber(
-        process.env.MAX_FILE_SIZE || '10485760',
-        'MAX_FILE_SIZE'
-      ),
+      MAX_FILE_SIZE: parseNumber(process.env.MAX_FILE_SIZE || '10485760', 'MAX_FILE_SIZE'),
       ALLOWED_FILE_TYPES:
         process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/heic,image/webp',
 
@@ -174,13 +169,13 @@ export function validateEnvironment(): EnvironmentConfig {
     // Validations supplémentaires
     validateConfig(config);
 
-    logger.info('✅ Variables d\'environnement validées avec succès');
+    logger.info("✅ Variables d'environnement validées avec succès");
     logger.info(`📍 Environnement: ${config.NODE_ENV}`);
     logger.info(`🚀 Port: ${config.PORT}`);
 
     return config;
   } catch (error) {
-    logger.error('❌ Erreur lors de la validation de l\'environnement', { error });
+    logger.error("❌ Erreur lors de la validation de l'environnement", { error });
     throw error;
   }
 }
@@ -213,12 +208,19 @@ function validateConfig(config: EnvironmentConfig): void {
   }
 
   // Vérifier le format des URLs
-  if (!config.MONGODB_URI.startsWith('mongodb://') && !config.MONGODB_URI.startsWith('mongodb+srv://')) {
+  if (
+    !config.MONGODB_URI.startsWith('mongodb://') &&
+    !config.MONGODB_URI.startsWith('mongodb+srv://')
+  ) {
     throw new Error('MONGODB_URI doit commencer par mongodb:// ou mongodb+srv://');
   }
 
   // Redis est optionnel, ne vérifier que s'il est fourni
-  if (config.REDIS_URL && !config.REDIS_URL.startsWith('redis://') && !config.REDIS_URL.startsWith('rediss://')) {
+  if (
+    config.REDIS_URL &&
+    !config.REDIS_URL.startsWith('redis://') &&
+    !config.REDIS_URL.startsWith('rediss://')
+  ) {
     throw new Error('REDIS_URL doit commencer par redis:// ou rediss://');
   }
 

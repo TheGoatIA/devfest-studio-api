@@ -58,12 +58,7 @@ export class StyleRepository implements IStyleRepository {
     options: StyleQueryOptions = {}
   ): Promise<{ styles: IStyleDocument[]; total: number }> {
     try {
-      const {
-        limit = 20,
-        offset = 0,
-        sortBy = 'metrics.popularity',
-        sortOrder = 'desc',
-      } = options;
+      const { limit = 20, offset = 0, sortBy = 'metrics.popularity', sortOrder = 'desc' } = options;
 
       // Construire le filtre
       const query: any = { 'availability.isActive': true };
@@ -173,10 +168,7 @@ export class StyleRepository implements IStyleRepository {
   /**
    * Mettre à jour un style
    */
-  async update(
-    styleId: string,
-    updates: Partial<IStyleDocument>
-  ): Promise<IStyleDocument | null> {
+  async update(styleId: string, updates: Partial<IStyleDocument>): Promise<IStyleDocument | null> {
     try {
       const style = await StyleModel.findOneAndUpdate(
         { styleId },

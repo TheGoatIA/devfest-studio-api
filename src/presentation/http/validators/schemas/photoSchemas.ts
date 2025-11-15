@@ -22,12 +22,8 @@ export const uploadPhotoMetadata = Joi.object({
 export const listPhotosQuery = Joi.object({
   limit: Joi.number().integer().min(1).max(100).default(20),
   offset: Joi.number().integer().min(0).default(0),
-  status: Joi.string()
-    .valid('uploaded', 'processing', 'ready', 'failed')
-    .optional(),
-  sort_by: Joi.string()
-    .valid('createdAt', 'updatedAt', 'fileSize')
-    .default('createdAt'),
+  status: Joi.string().valid('uploaded', 'processing', 'ready', 'failed').optional(),
+  sort_by: Joi.string().valid('createdAt', 'updatedAt', 'fileSize').default('createdAt'),
   sort_order: Joi.string().valid('asc', 'desc').default('desc'),
 });
 

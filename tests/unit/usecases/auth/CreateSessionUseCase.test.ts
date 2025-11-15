@@ -36,10 +36,7 @@ describe('CreateSessionUseCase', () => {
     };
 
     createSessionUseCase = new CreateSessionUseCase(
-      mockUserRepository,
-      mockSessionRepository,
-      mockJwtService,
-      mockCacheService
+    
     );
   });
 
@@ -54,6 +51,8 @@ describe('CreateSessionUseCase', () => {
           model: 'Pixel 7',
           appVersion: '1.0.0',
         },
+        ipAddress: '127.0.0.1',
+        userAgent: 'Mozilla/5.0',
       };
 
       mockUserRepository.findByDeviceId.mockResolvedValue(null);
@@ -91,6 +90,8 @@ describe('CreateSessionUseCase', () => {
           model: 'Pixel 7',
           appVersion: '1.0.0',
         },
+        ipAddress: '127.0.0.1',
+        userAgent: 'Mozilla/5.0',
       };
 
       mockUserRepository.findByDeviceId.mockResolvedValue({
@@ -124,6 +125,8 @@ describe('CreateSessionUseCase', () => {
           model: 'iPhone 14',
           appVersion: '1.0.0',
         },
+        ipAddress: '127.0.0.1',
+        userAgent: 'Mozilla/5.0',
       };
 
       mockUserRepository.findByDeviceId.mockResolvedValue({

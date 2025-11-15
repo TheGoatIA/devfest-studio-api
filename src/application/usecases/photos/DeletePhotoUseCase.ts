@@ -28,10 +28,7 @@ export class DeletePhotoUseCase {
   async execute(input: DeletePhotoInput): Promise<DeletePhotoOutput> {
     try {
       // 1. Récupérer la photo
-      const photo = await this.photoRepository.findByIdAndUser(
-        input.photoId,
-        input.userId
-      );
+      const photo = await this.photoRepository.findByIdAndUser(input.photoId, input.userId);
 
       if (!photo) {
         throw new NotFoundError('Photo non trouvée');
