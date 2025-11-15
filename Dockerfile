@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -7,17 +7,22 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies (with cache mount for faster builds)
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --only=production=false
 
 # Copy source code
 COPY src/ ./src/
+COPY public/ ./public/
 
 # Build application
 RUN npm run build
 
+# Remove devDependencies after build
+RUN npm prune --production
+
 # Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 WORKDIR /app
 
@@ -32,6 +37,10 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/package.json ./
+COPY --from=builder --chown=nodejs:nodejs /app/public ./public
+
+# Create uploads directory with correct permissions
+RUN mkdir -p /app/uploads && chown -R nodejs:nodejs /app/uploads
 
 # Switch to non-root user
 USER nodejs

@@ -1,0 +1,78 @@
+name: ❓ Question
+description: Poser une question sur l'utilisation de l'API
+title: "[QUESTION] : "
+labels: ["question", "à trier"]
+assignees:
+  - TheGoatIA
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Avant de poser votre question, vérifiez :
+        - La documentation : README.md et /docs
+        - Les issues existantes : quelqu'un a peut-être déjà posé cette question
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Votre question
+      description: Posez votre question de manière claire et détaillée
+      placeholder: Comment puis-je... ? Pourquoi... ? Est-il possible de... ?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Catégorie
+      description: À quoi se rapporte votre question ?
+      options:
+        - Installation/Configuration
+        - Authentification
+        - Photos (Upload/Gestion)
+        - Transformations d'images
+        - Styles
+        - Gallery
+        - API/Endpoints
+        - Docker/Déploiement
+        - Performance
+        - Sécurité
+        - Webhooks
+        - Autre
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte
+      description: Donnez plus de détails sur votre situation
+      placeholder: |
+        - Ce que vous essayez de faire
+        - Ce que vous avez déjà essayé
+        - Votre environnement (dev/prod/local)
+        - Versions utilisées
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code ou configuration
+      description: Si applicable, partagez du code ou votre configuration
+      placeholder: |
+        ```typescript
+        // Votre code ici
+        ```
+      render: typescript
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: J'ai consulté la documentation
+          required: true
+        - label: J'ai cherché dans les issues existantes
+          required: true
+        - label: Ma question est claire et détaillée
+          required: true

@@ -50,3 +50,12 @@ temp/
 *.pid
 *.seed
 *.pid.lock
+
+# Docker
+data/
+backups/
+uploads/*
+!uploads/.gitkeep
+
+# Nginx logs
+nginx/logs/

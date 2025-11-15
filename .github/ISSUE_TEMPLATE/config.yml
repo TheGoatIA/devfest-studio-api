@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/TheGoatIA/devfest-studio-api/discussions
+    about: Posez des questions et discutez avec la communauté
+  - name: 📖 Documentation
+    url: https://github.com/TheGoatIA/devfest-studio-api/blob/main/README.md
+    about: Consultez la documentation complète du projet
+  - name: 🔒 Sécurité
+    url: https://github.com/TheGoatIA/devfest-studio-api/security/policy
+    about: Signalez une vulnérabilité de sécurité (privé)

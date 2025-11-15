@@ -1,0 +1,244 @@
+name: CI - Tests et Build
+
+on:
+  push:
+    branches: [main, develop, dev]
+  pull_request:
+    branches: [main, develop, dev]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  # Job de lint et vérification du code
+  lint:
+    name: Lint et Formatage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Vérification du formatage (Prettier)
+        run: npm run format -- --check || true
+
+      - name: Lint (ESLint)
+        run: npm run lint || true
+
+  # Job de tests unitaires
+  test-unit:
+    name: Tests Unitaires
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Exécution des tests unitaires
+        run: npm test -- --coverage --testPathIgnorePatterns=integration
+        env:
+          NODE_ENV: test
+
+      - name: Upload de la couverture de code
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Archive des résultats de couverture
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  # Job de tests d'intégration
+  test-integration:
+    name: Tests d'Intégration
+    runs-on: ubuntu-latest
+    needs: lint
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Exécution des tests d'intégration
+        run: npm test -- --testPathPattern=integration
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017/devfest_studio_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-jwt-secret-key-for-testing-purposes
+          ENCRYPTION_KEY: test-encryption-key-32-chars-ok
+          GEMINI_API_KEY: test-gemini-key
+
+  # Job de build TypeScript
+  build:
+    name: Build TypeScript
+    runs-on: ubuntu-latest
+    needs: [test-unit, test-integration]
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Build de l'application
+        run: npm run build
+
+      - name: Vérification de la taille du build
+        run: |
+          BUILD_SIZE=$(du -sh dist | cut -f1)
+          echo "📦 Taille du build: $BUILD_SIZE"
+
+      - name: Upload des artifacts du build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # Job de build Docker
+  build-docker:
+    name: Build Image Docker
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build de l'image Docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: devfest-studio-api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/devfest-studio-api.tar
+
+      - name: Upload de l'image Docker
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp/devfest-studio-api.tar
+          retention-days: 1
+
+  # Job de sécurité - scan des dépendances
+  security:
+    name: Scan de Sécurité
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Audit npm
+        run: npm audit --audit-level=moderate || true
+
+      - name: Scan de sécurité avec Snyk
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # Job final - rapport de statut
+  status:
+    name: Statut Global
+    runs-on: ubuntu-latest
+    needs: [lint, test-unit, test-integration, build, build-docker, security]
+    if: always()
+
+    steps:
+      - name: Vérification du statut global
+        run: |
+          echo "✅ Pipeline CI terminé!"
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "Tests unitaires: ${{ needs.test-unit.result }}"
+          echo "Tests intégration: ${{ needs.test-integration.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Docker build: ${{ needs.build-docker.result }}"
+          echo "Sécurité: ${{ needs.security.result }}"
+
+      - name: Échec si erreurs critiques
+        if: |
+          needs.lint.result == 'failure' ||
+          needs.test-unit.result == 'failure' ||
+          needs.build.result == 'failure'
+        run: exit 1
