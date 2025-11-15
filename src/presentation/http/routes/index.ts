@@ -7,6 +7,8 @@
 
 import { Router } from 'express';
 import authRoutes from './authRoutes';
+import photoRoutes from './photoRoutes';
+import styleRoutes from './styleRoutes';
 
 // Créer le router principal
 const router = Router();
@@ -16,6 +18,18 @@ const router = Router();
  * Toutes les routes auth seront préfixées par /api/v1/auth
  */
 router.use('/auth', authRoutes);
+
+/**
+ * Monter les routes des photos
+ * Routes pour upload et gestion des photos
+ */
+router.use('/', photoRoutes);
+
+/**
+ * Monter les routes des styles
+ * Routes pour consultation des styles de transformation
+ */
+router.use('/', styleRoutes);
 
 /**
  * Route de test pour vérifier que l'API fonctionne
@@ -43,6 +57,9 @@ router.get('/info', (_req, res) => {
       endpoints: {
         health: '/api/v1/health',
         auth: '/api/v1/auth',
+        photos: '/api/v1/photos',
+        upload: '/api/v1/upload',
+        styles: '/api/v1/styles',
         docs: '/api/v1/docs',
       },
     },
