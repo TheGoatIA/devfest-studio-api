@@ -9,6 +9,8 @@ import { Router } from 'express';
 import authRoutes from './authRoutes';
 import photoRoutes from './photoRoutes';
 import styleRoutes from './styleRoutes';
+import transformationRoutes from './transformationRoutes';
+import galleryRoutes from './galleryRoutes';
 
 // Créer le router principal
 const router = Router();
@@ -30,6 +32,18 @@ router.use('/', photoRoutes);
  * Routes pour consultation des styles de transformation
  */
 router.use('/', styleRoutes);
+
+/**
+ * Monter les routes des transformations
+ * Routes pour lancer et suivre les transformations d'images
+ */
+router.use('/', transformationRoutes);
+
+/**
+ * Monter les routes de la galerie
+ * Routes pour consultation de la galerie et gestion des favoris
+ */
+router.use('/', galleryRoutes);
 
 /**
  * Route de test pour vérifier que l'API fonctionne
@@ -60,6 +74,10 @@ router.get('/info', (_req, res) => {
         photos: '/api/v1/photos',
         upload: '/api/v1/upload',
         styles: '/api/v1/styles',
+        transform: '/api/v1/transform',
+        transformations: '/api/v1/transformation/:id',
+        gallery: '/api/v1/gallery',
+        favorites: '/api/v1/favorites',
         docs: '/api/v1/docs',
       },
     },
