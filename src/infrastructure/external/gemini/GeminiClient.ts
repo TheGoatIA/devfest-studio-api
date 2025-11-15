@@ -290,9 +290,19 @@ Critères de validation :
 
       const processingTime = Date.now() - startTime;
 
+      // Vérifier que la réponse contient des candidats
+      if (!response.candidates || response.candidates.length === 0) {
+        throw new AppError('No candidates found in API response', 500);
+      }
+
+      const firstCandidate = response.candidates[0];
+      if (!firstCandidate || !firstCandidate.content || !firstCandidate.content.parts) {
+        throw new AppError('Invalid response structure from API', 500);
+      }
+
       // Extraire l'image transformée de la réponse
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
+      for (const part of firstCandidate.content.parts) {
+        if (part.inlineData && part.inlineData.data) {
           logger.info('✅ Transformation Gemini complétée avec succès', {
             processingTime,
             model: 'gemini-2.5-flash-image',
