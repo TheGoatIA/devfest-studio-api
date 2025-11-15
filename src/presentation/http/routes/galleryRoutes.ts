@@ -6,13 +6,11 @@ import { Router } from 'express';
 import { GalleryController } from '../controllers/GalleryController';
 import { gallerySchemas } from '../validators/schemas/gallerySchemas';
 import 'express-async-errors';
-import AuthMiddleware from '../middleware/AuthMiddleware';
-import ValidationMiddleware from '../middleware/ValidationMiddleware';
+import authenticate from '../middleware/AuthMiddleware';
+import { validate } from '../middleware/ValidationMiddleware';
 
 const router = Router();
 const galleryController = new GalleryController();
-const authMiddleware = new AuthMiddleware();
-const validationMiddleware = new ValidationMiddleware();
 
 /**
  * GET /api/v1/gallery
@@ -33,8 +31,8 @@ const validationMiddleware = new ValidationMiddleware();
  */
 router.get(
   '/gallery',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateQuery(gallerySchemas.getGalleryQuery),
+  authenticate,
+  validate(gallerySchemas.getGalleryQuery, 'query'),
   galleryController.getUserGallery
 );
 
@@ -49,8 +47,8 @@ router.get(
  */
 router.post(
   '/favorites',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateBody(gallerySchemas.addToFavorites),
+  authenticate,
+  validate(gallerySchemas.addToFavorites, 'body'),
   galleryController.addToFavorites
 );
 
@@ -65,8 +63,8 @@ router.post(
  */
 router.delete(
   '/favorites/:transformationId',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateParams(gallerySchemas.transformationIdParam),
+  authenticate,
+  validate(gallerySchemas.transformationIdParam, 'params'),
   galleryController.removeFromFavorites
 );
 

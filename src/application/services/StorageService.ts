@@ -2,7 +2,7 @@
  * Service de stockage cloud utilisant Google Cloud Storage
  */
 
-import { Storage, Bucket, File } from '@google-cloud/storage';
+import { Storage, Bucket } from '@google-cloud/storage';
 import sharp from 'sharp';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';

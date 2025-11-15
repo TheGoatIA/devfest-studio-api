@@ -12,7 +12,7 @@ import logger from '../../../config/logger';
  * Configuration du filtre de fichiers
  */
 const fileFilter = (
-  req: Request,
+  _req: Request,
   file: Express.Multer.File,
   callback: FileFilterCallback
 ): void => {
@@ -67,7 +67,7 @@ export const uploadMultiplePhotos = upload.array('files', 10); // Maximum 10 fic
 /**
  * Gestionnaire d'erreurs pour multer
  */
-export const handleMulterError = (error: any, req: Request, res: any, next: any) => {
+export const handleMulterError = (error: any, _req: Request, res: any, next: any) => {
   if (error instanceof multer.MulterError) {
     logger.error('❌ Erreur Multer', {
       code: error.code,

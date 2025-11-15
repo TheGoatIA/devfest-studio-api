@@ -10,13 +10,11 @@ import {
 } from '../middleware/UploadMiddleware';
 import { photoSchemas } from '../validators/schemas/photoSchemas';
 import 'express-async-errors';
-import AuthMiddleware from '../middleware/AuthMiddleware';
-import ValidationMiddleware from '../middleware/ValidationMiddleware';
+import authenticate from '../middleware/AuthMiddleware';
+import { validate } from '../middleware/ValidationMiddleware';
 
 const router = Router();
 const photoController = new PhotoController();
-const authMiddleware = new AuthMiddleware();
-const validationMiddleware = new ValidationMiddleware();
 
 /**
  * POST /api/v1/upload
@@ -30,7 +28,7 @@ const validationMiddleware = new ValidationMiddleware();
  */
 router.post(
   '/upload',
-  authMiddleware.authenticate(),
+  authenticate,
   uploadSinglePhoto,
   handleMulterError,
   photoController.uploadPhoto
@@ -51,8 +49,8 @@ router.post(
  */
 router.get(
   '/photos',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateQuery(photoSchemas.listPhotosQuery),
+  authenticate,
+  validate(photoSchemas.listPhotosQuery, 'query'),
   photoController.listPhotos
 );
 
@@ -67,8 +65,8 @@ router.get(
  */
 router.get(
   '/photos/:photoId',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateParams(photoSchemas.photoIdParam),
+  authenticate,
+  validate(photoSchemas.photoIdParam, 'params'),
   photoController.getPhoto
 );
 
@@ -83,8 +81,8 @@ router.get(
  */
 router.delete(
   '/photos/:photoId',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateParams(photoSchemas.photoIdParam),
+  authenticate,
+  validate(photoSchemas.photoIdParam, 'params'),
   photoController.deletePhoto
 );
 

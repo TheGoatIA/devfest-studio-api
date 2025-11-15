@@ -208,9 +208,10 @@ export class AIService implements IAIService {
    * Applique des améliorations basiques à l'image
    * (En attendant l'intégration d'un vrai modèle de génération)
    */
-  private async applyBasicEnhancements(
+  // @ts-expect-error - Legacy method kept for potential future use
+  private async _applyBasicEnhancements(
     imageBuffer: Buffer,
-    quality: 'standard' | 'high' | 'ultra'
+    _quality: 'standard' | 'high' | 'ultra'
   ): Promise<Buffer> {
     try {
       // Appliquer des filtres basiques pour simuler une transformation
@@ -235,7 +236,7 @@ export class AIService implements IAIService {
    */
   private generateTransformationPrompt(
     style: IStyleDocument | any,
-    options?: any
+    _options?: any
   ): string {
     if ('geminiConfig' in style) {
       // Style prédéfini
@@ -252,7 +253,8 @@ export class AIService implements IAIService {
   /**
    * Obtient les paramètres du modèle
    */
-  private getModelParameters(
+  // @ts-expect-error - Legacy method kept for potential future use
+  private _getModelParameters(
     style: IStyleDocument | any,
     quality: string
   ): {

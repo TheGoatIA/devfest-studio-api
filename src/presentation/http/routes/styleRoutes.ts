@@ -6,13 +6,11 @@ import { Router } from 'express';
 import { StyleController } from '../controllers/StyleController';
 import { styleSchemas } from '../validators/schemas/styleSchemas';
 import 'express-async-errors';
-import AuthMiddleware from '../middleware/AuthMiddleware';
-import ValidationMiddleware from '../middleware/ValidationMiddleware';
+import authenticate from '../middleware/AuthMiddleware';
+import { validate } from '../middleware/ValidationMiddleware';
 
 const router = Router();
 const styleController = new StyleController();
-const authMiddleware = new AuthMiddleware();
-const validationMiddleware = new ValidationMiddleware();
 
 /**
  * GET /api/v1/styles
@@ -30,8 +28,8 @@ const validationMiddleware = new ValidationMiddleware();
  */
 router.get(
   '/styles',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateQuery(styleSchemas.getStylesQuery),
+  authenticate,
+  validate(styleSchemas.getStylesQuery, 'query'),
   styleController.getStyles
 );
 
@@ -46,7 +44,7 @@ router.get(
  */
 router.get(
   '/styles/popular',
-  authMiddleware.authenticate(),
+  authenticate,
   styleController.getPopularStyles
 );
 
@@ -64,8 +62,8 @@ router.get(
  */
 router.get(
   '/styles/category/:category',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateParams(styleSchemas.categoryParam),
+  authenticate,
+  validate(styleSchemas.categoryParam, 'params'),
   styleController.getStylesByCategory
 );
 
@@ -80,8 +78,8 @@ router.get(
  */
 router.get(
   '/styles/:styleId',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateParams(styleSchemas.styleIdParam),
+  authenticate,
+  validate(styleSchemas.styleIdParam, 'params'),
   styleController.getStyleById
 );
 

@@ -2,7 +2,7 @@
  * Contrôleur pour la galerie
  */
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { TransformationRepository } from '../../../infrastructure/database/repositories/TransformationRepository';
 import { GetUserGalleryUseCase } from '../../../application/usecases/gallery/GetUserGalleryUseCase';
 import { AddToFavoritesUseCase } from '../../../application/usecases/gallery/AddToFavoritesUseCase';

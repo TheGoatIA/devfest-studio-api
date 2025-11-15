@@ -6,13 +6,11 @@ import { Router } from 'express';
 import { TransformationController } from '../controllers/TransformationController';
 import { transformationSchemas } from '../validators/schemas/transformationSchemas';
 import 'express-async-errors';
-import AuthMiddleware from '../middleware/AuthMiddleware';
-import ValidationMiddleware from '../middleware/ValidationMiddleware';
+import authenticate from '../middleware/AuthMiddleware';
+import { validate } from '../middleware/ValidationMiddleware';
 
 const router = Router();
 const transformationController = new TransformationController();
-const authMiddleware = new AuthMiddleware();
-const validationMiddleware = new ValidationMiddleware();
 
 /**
  * POST /api/v1/transform
@@ -30,8 +28,8 @@ const validationMiddleware = new ValidationMiddleware();
  */
 router.post(
   '/transform',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateBody(transformationSchemas.startTransformation),
+  authenticate,
+  validate(transformationSchemas.startTransformation, 'body'),
   transformationController.startTransformation
 );
 
@@ -46,8 +44,8 @@ router.post(
  */
 router.get(
   '/transformation/:id/status',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateParams(transformationSchemas.transformationIdParam),
+  authenticate,
+  validate(transformationSchemas.transformationIdParam, 'params'),
   transformationController.getTransformationStatus
 );
 
@@ -62,8 +60,8 @@ router.get(
  */
 router.get(
   '/transformation/:id',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateParams(transformationSchemas.transformationIdParam),
+  authenticate,
+  validate(transformationSchemas.transformationIdParam, 'params'),
   transformationController.getTransformation
 );
 
@@ -78,8 +76,8 @@ router.get(
  */
 router.delete(
   '/transformation/:id',
-  authMiddleware.authenticate(),
-  validationMiddleware.validateParams(transformationSchemas.transformationIdParam),
+  authenticate,
+  validate(transformationSchemas.transformationIdParam, 'params'),
   transformationController.cancelTransformation
 );
 

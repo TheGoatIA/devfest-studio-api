@@ -2,7 +2,7 @@
  * Contrôleur pour les transformations
  */
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { TransformationRepository } from '../../../infrastructure/database/repositories/TransformationRepository';
 import { PhotoRepository } from '../../../infrastructure/database/repositories/PhotoRepository';
 import { StyleRepository } from '../../../infrastructure/database/repositories/StyleRepository';
