@@ -73,7 +73,7 @@ export class StartTransformationUseCase {
 
       // 3. Récupérer le style si styleId fourni
       let style = null;
-      let customStyle = null;
+      let customStyle: { description: string; language: 'fr'; generatedPrompt: string; validationScore: number } | undefined = undefined;
 
       if (input.styleId) {
         style = await this.styleRepository.findById(input.styleId);

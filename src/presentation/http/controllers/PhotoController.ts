@@ -2,7 +2,7 @@
  * Contrôleur pour les photos
  */
 
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { PhotoRepository } from '../../../infrastructure/database/repositories/PhotoRepository';
 import { StorageService } from '../../../application/services/StorageService';
 import { UploadPhotoUseCase } from '../../../application/usecases/photos/UploadPhotoUseCase';

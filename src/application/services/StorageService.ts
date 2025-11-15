@@ -213,12 +213,21 @@ export class StorageService implements IStorageService {
 
       return {
         path: filePath,
-        size: parseInt(metadata.size || '0'),
+        size: parseInt(String(metadata.size || '0')),
         contentType: metadata.contentType || 'application/octet-stream',
         md5Hash: metadata.md5Hash,
-        createdAt: new Date(metadata.timeCreated),
-        updatedAt: new Date(metadata.updated),
-        customMetadata: metadata.metadata,
+        createdAt: new Date(metadata.timeCreated || Date.now()),
+        updatedAt: new Date(metadata.updated || Date.now()),
+        customMetadata: metadata.metadata
+          ? Object.fromEntries(
+              Object.entries(metadata.metadata).reduce((acc, [key, value]) => {
+                if (value !== null && value !== undefined) {
+                  acc.push([key, String(value)]);
+                }
+                return acc;
+              }, [] as [string, string][])
+            )
+          : undefined,
       };
     } catch (error: any) {
       logger.error('❌ Erreur récupération métadonnées', {

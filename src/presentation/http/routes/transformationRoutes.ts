@@ -4,10 +4,10 @@
 
 import { Router } from 'express';
 import { TransformationController } from '../controllers/TransformationController';
-import { AuthMiddleware } from '../middleware/AuthMiddleware';
-import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
 import { transformationSchemas } from '../validators/schemas/transformationSchemas';
 import 'express-async-errors';
+import AuthMiddleware from '../middleware/AuthMiddleware';
+import ValidationMiddleware from '../middleware/ValidationMiddleware';
 
 const router = Router();
 const transformationController = new TransformationController();

@@ -4,10 +4,10 @@
 
 import { Router } from 'express';
 import { GalleryController } from '../controllers/GalleryController';
-import { AuthMiddleware } from '../middleware/AuthMiddleware';
-import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
 import { gallerySchemas } from '../validators/schemas/gallerySchemas';
 import 'express-async-errors';
+import AuthMiddleware from '../middleware/AuthMiddleware';
+import ValidationMiddleware from '../middleware/ValidationMiddleware';
 
 const router = Router();
 const galleryController = new GalleryController();

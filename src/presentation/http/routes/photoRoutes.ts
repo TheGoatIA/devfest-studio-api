@@ -4,14 +4,14 @@
 
 import { Router } from 'express';
 import { PhotoController } from '../controllers/PhotoController';
-import { AuthMiddleware } from '../middleware/AuthMiddleware';
-import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
 import {
   uploadSinglePhoto,
   handleMulterError,
 } from '../middleware/UploadMiddleware';
 import { photoSchemas } from '../validators/schemas/photoSchemas';
 import 'express-async-errors';
+import AuthMiddleware from '../middleware/AuthMiddleware';
+import ValidationMiddleware from '../middleware/ValidationMiddleware';
 
 const router = Router();
 const photoController = new PhotoController();

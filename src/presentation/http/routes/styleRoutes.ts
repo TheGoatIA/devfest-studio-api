@@ -4,10 +4,10 @@
 
 import { Router } from 'express';
 import { StyleController } from '../controllers/StyleController';
-import { AuthMiddleware } from '../middleware/AuthMiddleware';
-import { ValidationMiddleware } from '../middleware/ValidationMiddleware';
 import { styleSchemas } from '../validators/schemas/styleSchemas';
 import 'express-async-errors';
+import AuthMiddleware from '../middleware/AuthMiddleware';
+import ValidationMiddleware from '../middleware/ValidationMiddleware';
 
 const router = Router();
 const styleController = new StyleController();

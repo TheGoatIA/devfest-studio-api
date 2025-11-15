@@ -281,8 +281,8 @@ class JWTService {
   generateTemporaryToken(payload: Record<string, any> ): string {
     return jwt.sign(payload, this.secret, {
       expiresIn: "1h",
-      issuer: 'cvgenius',
-      audience: 'cvgenius-client',
+      issuer: 'devfest-studio-api',
+      audience: 'devfest-studio-client',
     });
   }
 
