@@ -98,7 +98,7 @@ export class PhotoRepository implements IPhotoRepository {
         PhotoModel.countDocuments(filter),
       ]);
 
-      return { photos: photos as IPhotoDocument[], total };
+      return { photos: photos as unknown as IPhotoDocument[], total };
     } catch (error: any) {
       logger.error('❌ Erreur listage photos utilisateur', {
         error: error.message,

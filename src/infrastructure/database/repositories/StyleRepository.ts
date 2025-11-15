@@ -113,7 +113,7 @@ export class StyleRepository implements IStyleRepository {
         StyleModel.countDocuments(query),
       ]);
 
-      return { styles: styles as IStyleDocument[], total };
+      return { styles: styles as unknown as IStyleDocument[], total };
     } catch (error: any) {
       logger.error('❌ Erreur listage styles', { error: error.message });
       throw error;
@@ -132,7 +132,7 @@ export class StyleRepository implements IStyleRepository {
         .limit(limit)
         .lean();
 
-      return styles as IStyleDocument[];
+      return styles as unknown as IStyleDocument[];
     } catch (error: any) {
       logger.error('❌ Erreur récupération styles populaires', {
         error: error.message,
@@ -160,7 +160,7 @@ export class StyleRepository implements IStyleRepository {
         .limit(limit)
         .lean();
 
-      return styles as IStyleDocument[];
+      return styles as unknown as IStyleDocument[];
     } catch (error: any) {
       logger.error('❌ Erreur recherche styles', {
         error: error.message,
@@ -272,7 +272,7 @@ export class StyleRepository implements IStyleRepository {
         .limit(limit)
         .lean();
 
-      return styles as IStyleDocument[];
+      return styles as unknown as IStyleDocument[];
     } catch (error: any) {
       logger.error('❌ Erreur récupération styles par catégorie', {
         error: error.message,

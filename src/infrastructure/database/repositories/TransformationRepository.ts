@@ -96,7 +96,7 @@ export class TransformationRepository implements ITransformationRepository {
         TransformationModel.countDocuments(filter),
       ]);
 
-      return { transformations: transformations as ITransformationDocument[], total };
+      return { transformations: transformations as unknown as ITransformationDocument[], total };
     } catch (error: any) {
       logger.error('❌ Erreur listage transformations', {
         error: error.message,
