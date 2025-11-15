@@ -6,8 +6,10 @@
 
 import express, { Application } from 'express';
 import compression from 'compression';
+import swaggerUi from 'swagger-ui-express';
 import logger from './config/logger';
 import { config } from './config/environment';
+import { swaggerSpec } from './config/swagger';
 import { initializeDatabases, closeDatabases, checkDatabasesHealth } from './config/database';
 import {
   setupSecurityMiddleware,
@@ -63,11 +65,32 @@ async function startServer(): Promise<void> {
     // 5. Logger les requêtes
     app.use(requestLogger);
 
+    // ========== SWAGGER DOCUMENTATION ==========
+
+    // Swagger UI
+    app.use(
+      '/api/v1/docs',
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpec, {
+        customCss: '.swagger-ui .topbar { display: none }',
+        customSiteTitle: 'DevFest Studio API Docs',
+        customfavIcon: '/favicon.ico',
+      })
+    );
+
+    // Swagger JSON
+    app.get('/api/v1/docs.json', (_req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.send(swaggerSpec);
+    });
+
+    logger.info('📚 Swagger documentation configuré sur /api/v1/docs');
+
     // ========== ROUTES API ==========
-    
+
     // Importer toutes les routes
     const apiRoutes = require('./presentation/http/routes').default;
-    
+
     // Monter les routes sur /api/v1
     app.use('/api/v1', apiRoutes);
 
@@ -117,6 +140,7 @@ async function startServer(): Promise<void> {
       logger.info(`📍 URL: http://${config.HOST}:${config.PORT}`);
       logger.info(`🌍 Environnement: ${config.NODE_ENV}`);
       logger.info(`📝 Health check: http://${config.HOST}:${config.PORT}/api/v1/health`);
+      logger.info(`📚 Documentation API: http://${config.HOST}:${config.PORT}/api/v1/docs`);
       
       // Log supplémentaires en développement
       if (config.NODE_ENV === 'development') {

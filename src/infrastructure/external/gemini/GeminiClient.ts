@@ -2,16 +2,10 @@
  * Client pour l'API Google Gemini
  */
 
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { GoogleGenAI, Modality } from '@google/genai';
 import logger from '../../../config/logger';
 import { config } from '../../../config/environment';
 import { AppError } from '../../../shared/errors/AppError';
-
-export enum Modality {
-  TEXT = 'TEXT',
-  IMAGE = 'IMAGE',
-  AUDIO = 'AUDIO',
-}
 
 export interface GeminiGenerateInput {
   prompt: string;
@@ -45,7 +39,7 @@ export interface GeminiImageResponse {
 }
 
 export class GeminiClient {
-  private genAI: GoogleGenerativeAI;
+  private genAI: GoogleGenAI;
   private defaultModel: string;
 
   constructor() {
@@ -53,7 +47,7 @@ export class GeminiClient {
       throw new Error('GEMINI_API_KEY is required');
     }
 
-    this.genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+    this.genAI = new GoogleGenAI({ apiKey: config.GEMINI_API_KEY });
     this.defaultModel = 'gemini-2.5-flash-image';
 
     logger.info('🤖 GeminiClient initialisé', {
@@ -63,14 +57,25 @@ export class GeminiClient {
   }
 
   /**
-   * Génère du contenu avec Gemini
+   * Convertit un buffer en partie générative
+   */
+  private fileToGenerativePart(base64: string, mimeType: string) {
+    return {
+      inlineData: {
+        data: base64,
+        mimeType,
+      },
+    };
+  }
+
+  /**
+   * Génère du contenu avec Gemini (text-based)
    */
   async generate(input: GeminiGenerateInput): Promise<GeminiResponse> {
     try {
-      const modelName = input.model || this.defaultModel;
-      const model = this.genAI.getGenerativeModel({ model: modelName });
+      const modelName = input.model || 'gemini-pro';
 
-      logger.debug('🤖 Appel Gemini API', {
+      logger.debug('🤖 Appel Gemini API (text generation)', {
         model: modelName,
         hasImage: !!input.imageBuffer || !!input.imageUrl,
         promptLength: input.prompt.length,
@@ -84,12 +89,7 @@ export class GeminiClient {
       // Ajouter l'image si fournie
       if (input.imageBuffer) {
         const base64Image = input.imageBuffer.toString('base64');
-        parts.push({
-          inlineData: {
-            data: base64Image,
-            mimeType: 'image/jpeg',
-          },
-        });
+        parts.push(this.fileToGenerativePart(base64Image, 'image/jpeg'));
       }
 
       // Configuration de génération
@@ -100,15 +100,16 @@ export class GeminiClient {
         maxOutputTokens: input.parameters?.maxOutputTokens ?? 1024,
       };
 
-      // Générer le contenu
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts }],
-        generationConfig,
+      // Générer le contenu avec la nouvelle API
+      const response = await this.genAI.models.generateContent({
+        model: modelName,
+        contents: {
+          parts: parts,
+        },
+        config: generationConfig,
       });
 
-      const response = result.response;
-      const text = response.text();
-
+      const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
       const processingTime = Date.now() - startTime;
 
       logger.info('✅ Gemini API - Réponse reçue', {
@@ -119,7 +120,7 @@ export class GeminiClient {
 
       return {
         text,
-        confidence: 0.9, // Gemini ne retourne pas toujours un score de confiance
+        confidence: 0.9,
         metadata: {
           processingTime,
           model: modelName,
@@ -128,21 +129,15 @@ export class GeminiClient {
     } catch (error: any) {
       logger.error('❌ Erreur Gemini API', {
         error: error.message,
-        code: error.code,
-        status: error.status,
       });
 
       // Gérer les différents types d'erreurs
-      if (error.status === 429) {
-        throw new AppError('Trop de requêtes. Veuillez réessayer plus tard.', 429);
-      }
-
-      if (error.status === 403) {
+      if (error.message?.includes('API key not valid')) {
         throw new AppError('Clé API invalide ou accès refusé.', 403);
       }
 
-      if (error.status === 400) {
-        throw new AppError('Requête invalide. Vérifiez le format de l\'image.', 400);
+      if (error.message?.includes('quota')) {
+        throw new AppError('Trop de requêtes. Veuillez réessayer plus tard.', 429);
       }
 
       throw new AppError(`Erreur lors de l'appel à Gemini: ${error.message}`, 500);
@@ -261,7 +256,7 @@ Critères de validation :
   }
 
   /**
-   * Transforme une image avec Gemini 2.5 Flash Image
+   * Transforme une image avec Gemini 2.5 Flash Image (vraie transformation)
    */
   async transformImage(input: GeminiImageTransformInput): Promise<GeminiImageResponse> {
     try {
@@ -274,81 +269,76 @@ Critères de validation :
 
       // Préparer l'image
       const base64Image = input.imageBuffer.toString('base64');
-      const imagePart = {
-        inlineData: {
-          data: base64Image,
-          mimeType: input.mimeType || 'image/jpeg',
-        },
-      };
+      const imagePart = this.fileToGenerativePart(
+        base64Image,
+        input.mimeType || 'image/jpeg'
+      );
 
-      // Appel au modèle Gemini 2.5 Flash Image
-      const model = this.genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash-image'
-      });
-
-      const result = await model.generateContent({
-        contents: [{
-          role: 'user',
+      // Appel au modèle Gemini 2.5 Flash Image avec responseModalities
+      const response = await this.genAI.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: {
           parts: [
             imagePart,
             { text: input.prompt },
           ],
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.9,
-          topK: 40,
-          // responseModalities: [Modality.IMAGE], // Sera activé quand l'API le supporte
+        },
+        config: {
+          responseModalities: [Modality.IMAGE],
         },
       });
 
-      const response = result.response;
       const processingTime = Date.now() - startTime;
 
-      // Pour l'instant, Gemini retourne du texte décrivant la transformation
-      // Dans une vraie implémentation, il faudrait utiliser un modèle de génération d'image
-      // comme Imagen ou attendre que Gemini 2.5 Flash supporte responseModalities: IMAGE
+      // Extraire l'image transformée de la réponse
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+          logger.info('✅ Transformation Gemini complétée avec succès', {
+            processingTime,
+            model: 'gemini-2.5-flash-image',
+            transformedImageSize: part.inlineData.data.length,
+          });
 
-      // SIMULATION: Pour la démo, on retourne l'image originale
-      // En production, vous devriez intégrer Imagen ou un autre modèle de génération
-      logger.info('✅ Transformation Gemini complétée', {
-        processingTime,
-        model: 'gemini-2.5-flash-image',
-      });
+          // Convertir base64 en Buffer
+          const imageBuffer = Buffer.from(part.inlineData.data, 'base64');
 
-      // Note: Cette implémentation est une simulation
-      // Vous devez remplacer ceci par l'appel réel à Imagen ou attendre le support IMAGE
-      return {
-        imageBuffer: input.imageBuffer, // Temporaire: retourne l'image originale
-        mimeType: input.mimeType || 'image/jpeg',
-        metadata: {
-          processingTime,
-          model: 'gemini-2.5-flash-image',
-          prompt: input.prompt,
-          analysisText: response.text ? response.text() : 'Transformation appliquée',
-        },
-      };
+          return {
+            imageBuffer: imageBuffer,
+            mimeType: part.inlineData.mimeType || input.mimeType || 'image/jpeg',
+            metadata: {
+              processingTime,
+              model: 'gemini-2.5-flash-image',
+              prompt: input.prompt,
+              originalSize: input.imageBuffer.length,
+              transformedSize: imageBuffer.length,
+            },
+          };
+        }
+      }
+
+      // Si aucune image n'est trouvée dans la réponse
+      throw new AppError('No image data found in the API response.', 500);
+
     } catch (error: any) {
       logger.error('❌ Erreur transformation image Gemini', {
         error: error.message,
-        code: error.code,
-        status: error.status,
+        stack: error.stack,
       });
 
       // Gérer les différents types d'erreurs
-      if (error.status === 429) {
+      if (error.message?.includes('API key not valid')) {
+        throw new AppError('The provided API key is not valid. Please check your environment variables.', 403);
+      }
+
+      if (error.message?.includes('quota')) {
         throw new AppError('Trop de requêtes. Veuillez réessayer plus tard.', 429);
       }
 
-      if (error.status === 403) {
-        throw new AppError('Clé API invalide ou accès refusé.', 403);
+      if (error.message?.includes('No image data found')) {
+        throw new AppError(error.message, 500);
       }
 
-      if (error.status === 400) {
-        throw new AppError('Requête invalide. Vérifiez le format de l\'image.', 400);
-      }
-
-      throw new AppError(`Erreur lors de la transformation: ${error.message}`, 500);
+      throw new AppError(`Failed to transform image: ${error.message}`, 500);
     }
   }
 
