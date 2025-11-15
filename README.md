@@ -21,8 +21,8 @@ API REST complète pour l'application mobile DevFest Studio avec transformation 
 - ✅ **Transformation d'images** via Google Gemini AI
 - ✅ **Galerie publique et privée** des transformations
 - ✅ **Gestion des favoris** et partage social
-- ✅ **Cache Redis** pour les performances
-- ✅ **Rate limiting** et sécurité
+- ✅ **Cache Redis** pour les performances _(optionnel)_
+- ✅ **Rate limiting** et sécurité _(nécessite Redis)_
 - ✅ **Logs structurés** avec Winston
 - ✅ **Prêt pour production** sur Google Cloud Run
 
@@ -32,7 +32,7 @@ API REST complète pour l'application mobile DevFest Studio avec transformation 
 - **Langage**: TypeScript 5+
 - **Framework**: Express.js
 - **Base de données**: MongoDB avec Mongoose
-- **Cache**: Redis
+- **Cache**: Redis _(optionnel - améliore les performances)_
 - **Storage**: Google Cloud Storage
 - **IA**: Google Gemini API
 - **Déploiement**: Google Cloud Run (Docker)
@@ -43,10 +43,12 @@ API REST complète pour l'application mobile DevFest Studio avec transformation 
 
 - Node.js 20+
 - MongoDB 6+
-- Redis 7+
+- Redis 7+ _(optionnel - recommandé pour la production)_
 - Compte Google Cloud avec:
   - Cloud Storage activé
   - Gemini API activée
+
+> **Note** : Redis est optionnel. L'application fonctionne sans Redis mais avec des performances légèrement réduites et sans rate limiting. Voir [REDIS_OPTIONAL.md](./REDIS_OPTIONAL.md) pour plus de détails.
 
 ### Installation locale
 
@@ -64,7 +66,8 @@ cp .env.example .env
 # Éditer .env avec vos configurations
 nano .env
 
-# Lancer MongoDB et Redis localement
+# Lancer MongoDB localement (requis)
+# Lancer Redis localement (optionnel mais recommandé)
 # (via Docker ou installation locale)
 
 # Build TypeScript
@@ -91,7 +94,7 @@ HOST=0.0.0.0
 MONGODB_URI=mongodb://localhost:27017/devfest_studio
 MONGODB_DB_NAME=devfest_studio
 
-# Redis
+# Redis (OPTIONNEL - améliore les performances)
 REDIS_URL=redis://localhost:6379
 
 # Sécurité JWT

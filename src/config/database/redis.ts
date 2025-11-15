@@ -24,6 +24,7 @@ class RedisConnection {
 
   /**
    * Établir la connexion à Redis
+   * Note: Redis est optionnel - l'application continue sans cache si non disponible
    */
   async connect(): Promise<void> {
     try {
@@ -37,7 +38,7 @@ class RedisConnection {
           reconnectStrategy: (retries) => {
             // Stratégie de reconnexion exponentielle
             if (retries > this.maxRetries) {
-              logger.error('❌ Nombre maximum de tentatives Redis atteint');
+              logger.warn('⚠️  Nombre maximum de tentatives Redis atteint - Mode sans cache activé');
               return new Error('Trop de tentatives de reconnexion');
             }
             const delay = Math.min(retries * 100, 3000);
@@ -77,7 +78,7 @@ class RedisConnection {
       this.isConnected = false;
       this.connectionAttempts++;
 
-      logger.error('❌ Erreur de connexion à Redis', {
+      logger.warn('⚠️  Erreur de connexion à Redis', {
         error: error instanceof Error ? error.message : 'Erreur inconnue',
         attempt: this.connectionAttempts,
         maxRetries: this.maxRetries,
@@ -87,13 +88,18 @@ class RedisConnection {
       if (this.connectionAttempts < this.maxRetries) {
         const retryDelay = this.connectionAttempts * 2000;
         logger.info(`🔄 Nouvelle tentative dans ${retryDelay / 1000}s...`);
-        
+
         setTimeout(() => {
           this.connect();
         }, retryDelay);
       } else {
-        logger.error('❌ Impossible de se connecter à Redis');
-        throw new Error('Impossible de se connecter à Redis');
+        logger.warn('⚠️  Redis non disponible - L\'application continuera sans cache');
+        logger.info('ℹ️  Les fonctionnalités suivantes seront désactivées: cache de sessions, rate limiting');
+
+        // Ne pas lancer d'erreur - l'application continue sans Redis
+        this.isConnected = false;
+        this.client = null;
+        this.subscriber = null;
       }
     }
   }
@@ -135,23 +141,22 @@ class RedisConnection {
 
   /**
    * Obtenir le client Redis
+   * Retourne null si Redis n'est pas disponible (mode dégradé)
    */
-  getClient(): RedisClientType {
-    if (!this.client) {
-      throw new Error('Redis client n\'est pas initialisé');
-    }
-    if (!this.isConnected) {
-      throw new Error('Redis n\'est pas connecté');
+  getClient(): RedisClientType | null {
+    if (!this.client || !this.isConnected) {
+      return null;
     }
     return this.client;
   }
 
   /**
    * Obtenir le client subscriber
+   * Retourne null si Redis n'est pas disponible (mode dégradé)
    */
-  getSubscriber(): RedisClientType {
-    if (!this.subscriber) {
-      throw new Error('Redis subscriber n\'est pas initialisé');
+  getSubscriber(): RedisClientType | null {
+    if (!this.subscriber || !this.isConnected) {
+      return null;
     }
     return this.subscriber;
   }
@@ -244,92 +249,128 @@ class RedisConnection {
 
   /**
    * Sauvegarder une valeur dans le cache
+   * Retourne false si Redis n'est pas disponible (mode dégradé)
    */
   async set(key: string, value: any, expirySeconds?: number): Promise<boolean> {
     try {
       const client = this.getClient();
+      if (!client) {
+        logger.debug('⚠️  Redis non disponible, skip cache SET', { key });
+        return false;
+      }
+
       const serialized = JSON.stringify(value);
-      
+
       if (expirySeconds) {
         await client.setEx(key, expirySeconds, serialized);
       } else {
         await client.set(key, serialized);
       }
-      
+
       return true;
     } catch (error) {
-      logger.error('❌ Erreur Redis SET', { key, error });
+      logger.warn('⚠️  Erreur Redis SET (mode dégradé actif)', { key, error });
       return false;
     }
   }
 
   /**
    * Récupérer une valeur du cache
+   * Retourne null si Redis n'est pas disponible (mode dégradé)
    */
   async get<T>(key: string): Promise<T | null> {
     try {
       const client = this.getClient();
+      if (!client) {
+        logger.debug('⚠️  Redis non disponible, skip cache GET', { key });
+        return null;
+      }
+
       const value = await client.get(key);
-      
+
       if (!value) return null;
-      
+
       return JSON.parse(value) as T;
     } catch (error) {
-      logger.error('❌ Erreur Redis GET', { key, error });
+      logger.warn('⚠️  Erreur Redis GET (mode dégradé actif)', { key, error });
       return null;
     }
   }
 
   /**
    * Supprimer une clé
+   * Retourne false si Redis n'est pas disponible (mode dégradé)
    */
   async del(key: string): Promise<boolean> {
     try {
       const client = this.getClient();
+      if (!client) {
+        logger.debug('⚠️  Redis non disponible, skip cache DEL', { key });
+        return false;
+      }
+
       await client.del(key);
       return true;
     } catch (error) {
-      logger.error('❌ Erreur Redis DEL', { key, error });
+      logger.warn('⚠️  Erreur Redis DEL (mode dégradé actif)', { key, error });
       return false;
     }
   }
 
   /**
    * Vérifier si une clé existe
+   * Retourne false si Redis n'est pas disponible (mode dégradé)
    */
   async exists(key: string): Promise<boolean> {
     try {
       const client = this.getClient();
+      if (!client) {
+        logger.debug('⚠️  Redis non disponible, skip cache EXISTS', { key });
+        return false;
+      }
+
       const result = await client.exists(key);
       return result === 1;
     } catch (error) {
-      logger.error('❌ Erreur Redis EXISTS', { key, error });
+      logger.warn('⚠️  Erreur Redis EXISTS (mode dégradé actif)', { key, error });
       return false;
     }
   }
 
   /**
    * Incrémenter une valeur
+   * Retourne 0 si Redis n'est pas disponible (mode dégradé)
    */
   async increment(key: string, by: number = 1): Promise<number> {
     try {
       const client = this.getClient();
+      if (!client) {
+        logger.debug('⚠️  Redis non disponible, skip cache INCREMENT', { key });
+        return 0;
+      }
+
       return await client.incrBy(key, by);
     } catch (error) {
-      logger.error('❌ Erreur Redis INCR', { key, error });
-      throw error;
+      logger.warn('⚠️  Erreur Redis INCR (mode dégradé actif)', { key, error });
+      return 0;
     }
   }
 
   /**
    * Définir l'expiration d'une clé
+   * Retourne false si Redis n'est pas disponible (mode dégradé)
    */
   async expire(key: string, seconds: number): Promise<boolean> {
     try {
       const client = this.getClient();
+      if (!client) {
+        logger.debug('⚠️  Redis non disponible, skip cache EXPIRE', { key });
+        return false;
+      }
+
       return (await client.expire(key, seconds)) === 1;
     } catch (error) {
-      logger.error('❌ Erreur Redis EXPIRE', { key, error });
+      logger.warn('⚠️  Erreur Redis EXPIRE (mode dégradé actif)', { key, error });
       return false;
     }
   }
