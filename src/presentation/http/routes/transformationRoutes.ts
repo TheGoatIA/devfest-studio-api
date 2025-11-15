@@ -81,4 +81,17 @@ router.delete(
   transformationController.cancelTransformation
 );
 
+/**
+ * GET /api/v1/transformations/recent
+ * Récupérer les transformations récentes (pour le dashboard)
+ *
+ * PUBLIC - Pas d'authentification requise
+ * Query params:
+ *   limit?: number (default: 50)
+ */
+router.get(
+  '/transformations/recent',
+  transformationController.getRecentTransformations
+);
+
 export default router;

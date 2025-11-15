@@ -11,6 +11,7 @@ import photoRoutes from './photoRoutes';
 import styleRoutes from './styleRoutes';
 import transformationRoutes from './transformationRoutes';
 import galleryRoutes from './galleryRoutes';
+import eventsRoutes from './eventsRoutes';
 
 // Créer le router principal
 const router = Router();
@@ -44,6 +45,12 @@ router.use('/', transformationRoutes);
  * Routes pour consultation de la galerie et gestion des favoris
  */
 router.use('/', galleryRoutes);
+
+/**
+ * Monter les routes des événements
+ * Routes pour les événements en temps réel (SSE)
+ */
+router.use('/', eventsRoutes);
 
 /**
  * Route de test pour vérifier que l'API fonctionne

@@ -33,6 +33,7 @@
     "@google-cloud/storage": "^7.17.3",
     "@google/genai": "^1.29.1",
     "@types/swagger-jsdoc": "^6.0.4",
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",

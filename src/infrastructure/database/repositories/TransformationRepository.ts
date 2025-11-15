@@ -253,4 +253,27 @@ export class TransformationRepository implements ITransformationRepository {
       throw err;
     }
   }
+
+  /**
+   * Récupérer les transformations récentes (pour le dashboard)
+   */
+  async findRecent(
+    limit: number = 50
+  ): Promise<ITransformationDocument[]> {
+    try {
+      const transformations = await TransformationModel.find({
+        'processing.status': 'completed',
+      })
+        .sort({ 'processing.completedAt': -1 })
+        .limit(limit)
+        .lean();
+
+      return transformations as unknown as ITransformationDocument[];
+    } catch (error: any) {
+      logger.error('❌ Erreur récupération transformations récentes', {
+        error: error.message,
+      });
+      throw error;
+    }
+  }
 }

@@ -6,8 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { ITransformationRepository } from '../../../core/interfaces/repositories/ITransformationRepository';
 import { IPhotoRepository } from '../../../core/interfaces/repositories/IPhotoRepository';
 import { IStyleRepository } from '../../../core/interfaces/repositories/IStyleRepository';
-import { StorageService } from '../../services/StorageService';
+import { IStorageService } from '../../../core/interfaces/services/IStorageService';
 import { AIService } from '../../services/AIService';
+import { webhookService } from '../../services/WebhookService';
 import logger from '../../../config/logger';
 import { AppError } from '../../../shared/errors/AppError';
 import { NotFoundError } from '../../../shared/errors/NotFoundError';
@@ -40,7 +41,7 @@ export class StartTransformationUseCase {
     private transformationRepository: ITransformationRepository,
     private photoRepository: IPhotoRepository,
     private styleRepository: IStyleRepository,
-    private storageService: StorageService,
+    private storageService: IStorageService,
     private aiService: AIService
   ) {}
 
@@ -142,11 +143,19 @@ export class StartTransformationUseCase {
         },
       });
 
-      // 5. Démarrer le traitement asynchrone
-      // En production, ceci serait géré par une queue (Bull, BullMQ, etc.)
-      this.processTransformationAsync(transformationId, photo, style || customStyle!);
+      // 5. Émettre l'événement de démarrage
+      await webhookService.transformationStarted(
+        transformationId,
+        input.userId,
+        input.photoId,
+        input.styleId || 'custom'
+      );
 
-      // 6. Calculer le temps estimé
+      // 6. Démarrer le traitement asynchrone
+      // En production, ceci serait géré par une queue (Bull, BullMQ, etc.)
+      this.processTransformationAsync(transformationId, photo, style || customStyle!, input.userId);
+
+      // 7. Calculer le temps estimé
       const estimatedTime = style
         ? style.technical.estimatedProcessingTime
         : customStyle
@@ -192,7 +201,8 @@ export class StartTransformationUseCase {
   private async processTransformationAsync(
     transformationId: string,
     photo: any,
-    style: any
+    style: any,
+    userId: string
   ): Promise<void> {
     try {
       // Mettre à jour le statut
@@ -255,6 +265,15 @@ export class StartTransformationUseCase {
       });
 
       logger.info('✅ Transformation complétée', { transformationId });
+
+      // Émettre l'événement de complétion
+      await webhookService.transformationCompleted(
+        transformationId,
+        userId,
+        photo.photoId,
+        style.styleId || 'custom',
+        uploadResult.publicUrl
+      );
     } catch (error: any) {
       logger.error('❌ Erreur traitement transformation', {
         error: error.message,
@@ -266,6 +285,13 @@ export class StartTransformationUseCase {
         message: error.message,
         retryable: true,
       });
+
+      // Émettre l'événement d'échec
+      await webhookService.transformationFailed(
+        transformationId,
+        userId,
+        error.message
+      );
     }
   }
 }

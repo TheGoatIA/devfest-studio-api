@@ -3,7 +3,7 @@
  */
 
 import { IPhotoRepository } from '../../../core/interfaces/repositories/IPhotoRepository';
-import { StorageService } from '../../services/StorageService';
+import { IStorageService } from '../../../core/interfaces/services/IStorageService';
 import logger from '../../../config/logger';
 import { NotFoundError } from '../../../shared/errors/NotFoundError';
 import { AppError } from '../../../shared/errors/AppError';
@@ -22,7 +22,7 @@ export interface DeletePhotoOutput {
 export class DeletePhotoUseCase {
   constructor(
     private photoRepository: IPhotoRepository,
-    private storageService: StorageService
+    private storageService: IStorageService
   ) {}
 
   async execute(input: DeletePhotoInput): Promise<DeletePhotoOutput> {

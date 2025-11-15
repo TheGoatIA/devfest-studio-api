@@ -5,7 +5,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 import { IPhotoRepository } from '../../../core/interfaces/repositories/IPhotoRepository';
-import { StorageService } from '../../services/StorageService';
+import { IStorageService } from '../../../core/interfaces/services/IStorageService';
 import logger from '../../../config/logger';
 import { AppError } from '../../../shared/errors/AppError';
 import { config } from '../../../config/environment';
@@ -48,7 +48,7 @@ export interface UploadPhotoOutput {
 export class UploadPhotoUseCase {
   constructor(
     private photoRepository: IPhotoRepository,
-    private storageService: StorageService
+    private storageService: IStorageService
   ) {}
 
   async execute(input: UploadPhotoInput): Promise<UploadPhotoOutput> {

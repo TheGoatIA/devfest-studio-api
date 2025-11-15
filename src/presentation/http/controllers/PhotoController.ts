@@ -4,7 +4,7 @@
 
 import { Response } from 'express';
 import { PhotoRepository } from '../../../infrastructure/database/repositories/PhotoRepository';
-import { StorageService } from '../../../application/services/StorageService';
+import { LocalStorageService } from '../../../application/services/LocalStorageService';
 import { UploadPhotoUseCase } from '../../../application/usecases/photos/UploadPhotoUseCase';
 import { GetPhotoUseCase } from '../../../application/usecases/photos/GetPhotoUseCase';
 import { DeletePhotoUseCase } from '../../../application/usecases/photos/DeletePhotoUseCase';
@@ -20,7 +20,7 @@ export class PhotoController {
 
   constructor() {
     const photoRepository = new PhotoRepository();
-    const storageService = new StorageService();
+    const storageService = new LocalStorageService();
 
     this.uploadPhotoUseCase = new UploadPhotoUseCase(photoRepository, storageService);
     this.getPhotoUseCase = new GetPhotoUseCase(photoRepository);

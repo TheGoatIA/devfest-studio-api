@@ -2,11 +2,11 @@
  * Contrôleur pour les transformations
  */
 
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { TransformationRepository } from '../../../infrastructure/database/repositories/TransformationRepository';
 import { PhotoRepository } from '../../../infrastructure/database/repositories/PhotoRepository';
 import { StyleRepository } from '../../../infrastructure/database/repositories/StyleRepository';
-import { StorageService } from '../../../application/services/StorageService';
+import { LocalStorageService } from '../../../application/services/LocalStorageService';
 import { AIService } from '../../../application/services/AIService';
 import { StartTransformationUseCase } from '../../../application/usecases/transformations/StartTransformationUseCase';
 import { GetTransformationStatusUseCase } from '../../../application/usecases/transformations/GetTransformationStatusUseCase';
@@ -24,7 +24,7 @@ export class TransformationController {
     const transformationRepository = new TransformationRepository();
     const photoRepository = new PhotoRepository();
     const styleRepository = new StyleRepository();
-    const storageService = new StorageService();
+    const storageService = new LocalStorageService();
     const aiService = new AIService();
 
     this.startTransformationUseCase = new StartTransformationUseCase(
@@ -181,6 +181,41 @@ export class TransformationController {
       logger.error('❌ Erreur annulation transformation', {
         error: error.message,
         transformationId: req.params.id,
+      });
+      throw error;
+    }
+  };
+
+  /**
+   * GET /api/v1/transformations/recent
+   * Récupérer les transformations récentes pour le dashboard
+   *
+   * PUBLIC - Pas d'authentification requise
+   */
+  getRecentTransformations = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const transformationRepository = new TransformationRepository();
+
+      const transformations = await transformationRepository.findRecent(limit);
+
+      // Formater les données pour le dashboard
+      const formattedData = transformations.map(t => ({
+        transformationId: t.transformationId,
+        styleId: t.styleId || 'custom',
+        resultUrl: t.result?.transformedImageUrl || '',
+        url: t.result?.transformedImageUrl || '',
+        timestamp: t.processing?.completedAt || t.createdAt,
+        status: t.processing?.status,
+      }));
+
+      res.status(200).json({
+        success: true,
+        data: formattedData,
+      });
+    } catch (error: any) {
+      logger.error('❌ Erreur récupération transformations récentes', {
+        error: error.message,
       });
       throw error;
     }

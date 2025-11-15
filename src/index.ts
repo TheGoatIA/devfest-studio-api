@@ -7,6 +7,7 @@
 import express, { Application } from 'express';
 import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
+import path from 'path';
 import logger from './config/logger';
 import { config } from './config/environment';
 import { swaggerSpec } from './config/swagger';
@@ -64,6 +65,18 @@ async function startServer(): Promise<void> {
 
     // 5. Logger les requêtes
     app.use(requestLogger);
+
+    // ========== FICHIERS STATIQUES (UPLOADS) ==========
+
+    // Servir les fichiers uploadés (photos et transformations)
+    const uploadsPath = path.join(process.cwd(), 'uploads');
+    app.use('/uploads', express.static(uploadsPath));
+
+    // Servir le dossier public (pour le dashboard)
+    const publicPath = path.join(process.cwd(), 'public');
+    app.use('/public', express.static(publicPath));
+
+    logger.info('📁 Fichiers statiques configurés', { uploadsPath, publicPath });
 
     // ========== SWAGGER DOCUMENTATION ==========
 
@@ -174,7 +187,13 @@ async function startServer(): Promise<void> {
         message: '🎨 Bienvenue sur DevFest Studio API',
         documentation: '/api/v1/docs',
         health: '/api/v1/health',
+        dashboard: '/dashboard',
       });
+    });
+
+    // Route pour le dashboard en temps réel
+    app.get('/dashboard', (_req, res) => {
+      res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
     });
 
     // ========== GESTION DES ERREURS ==========
