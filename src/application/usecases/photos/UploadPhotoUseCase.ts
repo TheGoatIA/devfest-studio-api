@@ -90,7 +90,7 @@ export class UploadPhotoUseCase {
           originalUrl: uploadResult.publicUrl,
           thumbnailUrl: uploadResult.thumbnailUrl || '',
           cloudPath: uploadResult.path,
-          bucket: config.STORAGE_BUCKET,
+          bucket: config.STORAGE_BUCKET || 'devfest-studio-uploads',
         },
         processing: {
           status: 'ready',

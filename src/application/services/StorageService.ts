@@ -34,7 +34,7 @@ export class StorageService implements IStorageService {
     }
 
     this.storage = new Storage(storageOptions);
-    this.bucketName = config.STORAGE_BUCKET;
+    this.bucketName = config.STORAGE_BUCKET || 'devfest-studio-uploads';
     this.bucket = this.storage.bucket(this.bucketName);
 
     logger.info('📦 StorageService initialisé', {

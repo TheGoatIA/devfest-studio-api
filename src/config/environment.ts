@@ -26,8 +26,8 @@ export interface EnvironmentConfig {
   MONGODB_URI: string;
   MONGODB_DB_NAME: string;
 
-  // Cache Redis
-  REDIS_URL: string;
+  // Cache Redis (OPTIONNEL)
+  REDIS_URL?: string;
 
   // Sécurité JWT
   JWT_SECRET: string;
@@ -35,10 +35,10 @@ export interface EnvironmentConfig {
   JWT_REFRESH_EXPIRY: string;
   ENCRYPTION_KEY: string;
 
-  // Google Cloud
-  GOOGLE_CLOUD_PROJECT_ID: string;
+  // Google Cloud (OPTIONNEL - pour Gemini uniquement si besoin)
+  GOOGLE_CLOUD_PROJECT_ID?: string;
   GOOGLE_CLOUD_KEY_FILE?: string;
-  STORAGE_BUCKET: string;
+  STORAGE_BUCKET?: string;
 
   // Gemini AI
   GEMINI_API_KEY: string;
@@ -124,8 +124,8 @@ export function validateEnvironment(): EnvironmentConfig {
       MONGODB_URI: getRequiredEnv('MONGODB_URI'),
       MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || 'devfest_studio',
 
-      // Redis
-      REDIS_URL: getRequiredEnv('REDIS_URL'),
+      // Redis (OPTIONNEL)
+      REDIS_URL: getOptionalEnv('REDIS_URL'),
 
       // JWT
       JWT_SECRET: getRequiredEnv('JWT_SECRET'),
@@ -133,10 +133,10 @@ export function validateEnvironment(): EnvironmentConfig {
       JWT_REFRESH_EXPIRY: process.env.JWT_REFRESH_EXPIRY || '7d',
       ENCRYPTION_KEY: getRequiredEnv('ENCRYPTION_KEY'),
 
-      // Google Cloud
-      GOOGLE_CLOUD_PROJECT_ID: getRequiredEnv('GOOGLE_CLOUD_PROJECT_ID'),
+      // Google Cloud (OPTIONNEL - utilisé seulement pour Gemini si clé API pas fournie)
+      GOOGLE_CLOUD_PROJECT_ID: getOptionalEnv('GOOGLE_CLOUD_PROJECT_ID'),
       GOOGLE_CLOUD_KEY_FILE: getOptionalEnv('GOOGLE_CLOUD_KEY_FILE'),
-      STORAGE_BUCKET: getRequiredEnv('STORAGE_BUCKET'),
+      STORAGE_BUCKET: process.env.STORAGE_BUCKET || 'devfest-studio-uploads',
 
       // Gemini AI
       GEMINI_API_KEY: getRequiredEnv('GEMINI_API_KEY'),
@@ -217,7 +217,8 @@ function validateConfig(config: EnvironmentConfig): void {
     throw new Error('MONGODB_URI doit commencer par mongodb:// ou mongodb+srv://');
   }
 
-  if (!config.REDIS_URL.startsWith('redis://') && !config.REDIS_URL.startsWith('rediss://')) {
+  // Redis est optionnel, ne vérifier que s'il est fourni
+  if (config.REDIS_URL && !config.REDIS_URL.startsWith('redis://') && !config.REDIS_URL.startsWith('rediss://')) {
     throw new Error('REDIS_URL doit commencer par redis:// ou rediss://');
   }
 
