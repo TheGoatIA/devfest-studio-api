@@ -13,7 +13,7 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
-    "seed": "ts-node scripts/seed-database.ts",
+    "seed": "ts-node scripts/seed-styles.ts",
     "migrate": "ts-node scripts/migrate-database.ts",
     "health-check": "ts-node scripts/health-check.ts"
   },

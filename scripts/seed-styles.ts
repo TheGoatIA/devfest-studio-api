@@ -8,7 +8,6 @@
 import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { StyleModel } from '../src/infrastructure/database/mongodb/models/StyleModel';
-import logger from '../src/config/logger';
 import { config } from '../src/config/environment';
 
 /**
