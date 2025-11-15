@@ -67,21 +67,75 @@ async function startServer(): Promise<void> {
 
     // ========== SWAGGER DOCUMENTATION ==========
 
-    // Swagger UI
+    // Swagger JSON endpoint (avant Swagger UI pour éviter les conflits)
+    app.get('/api/v1/docs.json', (_req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'inline; filename="devfest-studio-api.json"');
+      res.send(swaggerSpec);
+    });
+
+    // Swagger UI avec bouton de téléchargement
     app.use(
       '/api/v1/docs',
       swaggerUi.serve,
       swaggerUi.setup(swaggerSpec, {
-        customCss: '.swagger-ui .topbar { display: none }',
+        customCss: `
+          .swagger-ui .topbar { display: none }
+          .swagger-ui .info {
+            margin-bottom: 20px;
+          }
+          .download-json-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background-color: #4990e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.2s;
+          }
+          .download-json-button:hover {
+            background-color: #357abd;
+          }
+        `,
         customSiteTitle: 'DevFest Studio API Docs',
         customfavIcon: '/favicon.ico',
+        swaggerOptions: {
+          persistAuthorization: true,
+          displayRequestDuration: true,
+          filter: true,
+          tryItOutEnabled: true,
+        },
+        customJs: '/api/v1/swagger-custom.js',
       })
     );
 
-    // Swagger JSON
-    app.get('/api/v1/docs.json', (_req, res) => {
-      res.setHeader('Content-Type', 'application/json');
-      res.send(swaggerSpec);
+    // Script personnalisé pour le bouton de téléchargement
+    app.get('/api/v1/swagger-custom.js', (_req, res) => {
+      res.setHeader('Content-Type', 'application/javascript');
+      res.send(`
+        (function() {
+          // Attendre que Swagger UI soit chargé
+          setTimeout(function() {
+            // Créer le bouton de téléchargement
+            var downloadButton = document.createElement('a');
+            downloadButton.href = '/api/v1/docs.json';
+            downloadButton.download = 'devfest-studio-api.json';
+            downloadButton.className = 'download-json-button';
+            downloadButton.innerHTML = '📥 Télécharger JSON';
+            downloadButton.title = 'Télécharger la spécification OpenAPI en JSON';
+
+            // Ajouter le bouton au DOM
+            document.body.appendChild(downloadButton);
+          }, 500);
+        })();
+      `);
     });
 
     logger.info('📚 Swagger documentation configuré sur /api/v1/docs');

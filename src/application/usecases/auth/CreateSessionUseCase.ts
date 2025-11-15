@@ -101,6 +101,7 @@ export class CreateSessionUseCase {
 
       // 5. Créer la session dans MongoDB
       const session = await sessionRepository.create({
+        sessionId: sessionId, // IMPORTANT: Passer le même sessionId que celui dans le JWT
         userId: user.userId,
         deviceId: input.deviceId,
         accessToken: tokens.accessToken,

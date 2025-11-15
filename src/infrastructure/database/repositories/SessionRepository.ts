@@ -13,6 +13,7 @@ import { NotFoundError, AuthenticationError } from '../../../presentation/http/m
  * DTO pour créer une session
  */
 export interface CreateSessionDTO {
+  sessionId?: string; // Optionnel - sera généré si non fourni
   userId: string;
   deviceId: string;
   accessToken: string;
@@ -43,14 +44,14 @@ export interface CreateSessionDTO {
 export class SessionRepository {
   /**
    * Créer une nouvelle session
-   * 
+   *
    * @param data - Données pour créer la session
    * @returns Session créée
    */
   async create(data: CreateSessionDTO): Promise<ISession> {
     try {
       const session = new SessionModel({
-        sessionId: uuidv4(),
+        sessionId: data.sessionId || uuidv4(), // Utiliser le sessionId fourni ou en générer un nouveau
         userId: data.userId,
         deviceId: data.deviceId,
         tokens: {
