@@ -158,45 +158,6 @@ services:
         max-file: "3"
         labels: "service=redis"
 
-  # Nginx Reverse Proxy (optional)
-  nginx:
-    image: nginx:alpine
-    container_name: devfest-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - nginx_logs:/var/log/nginx
-      - uploads:/var/www/uploads:ro
-    depends_on:
-      - api
-    networks:
-      - devfest-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 64M
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-        labels: "service=nginx"
-    profiles:
-      - with-nginx
-
 # Named Volumes for persistence
 volumes:
   mongodb_data:
@@ -219,8 +180,6 @@ volumes:
       type: none
       o: bind
       device: ./uploads
-  nginx_logs:
-    driver: local
 
 # Custom network
 networks:

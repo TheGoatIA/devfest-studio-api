@@ -53,10 +53,6 @@ prod-down: ## Arrête l'environnement de production
 	$(COMPOSE_PROD) down
 	@echo "✅ Environnement de production arrêté"
 
-prod-nginx: ## Lance la production avec Nginx
-	$(COMPOSE_PROD) --profile with-nginx up -d
-	@echo "✅ Production avec Nginx démarré"
-
 # Common commands
 build: ## Build les images Docker
 	$(COMPOSE_PROD) build
