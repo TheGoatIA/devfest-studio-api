@@ -210,14 +210,6 @@ jobs:
       - name: Audit npm
         run: npm audit --audit-level=moderate || true
 
-      - name: Scan de sécurité avec Snyk
-        uses: snyk/actions/node@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
-
   # Job final - rapport de statut
   status:
     name: Statut Global

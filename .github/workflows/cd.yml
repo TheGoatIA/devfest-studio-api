@@ -119,16 +119,6 @@ jobs:
           echo "🏥 Vérification de la santé de l'application..."
           # curl -f https://staging.devfest-studio.example.com/api/v1/health
 
-      - name: Notification Slack (Staging)
-        uses: 8398a7/action-slack@v3
-        if: always()
-        with:
-          status: ${{ job.status }}
-          text: 'Déploiement Staging ${{ job.status }}'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
   # Déploiement en production
   deploy-production:
     name: Déployer en Production
@@ -171,16 +161,6 @@ jobs:
           files: |
             dist/**/*
 
-      - name: Notification Slack (Production)
-        uses: 8398a7/action-slack@v3
-        if: always()
-        with:
-          status: ${{ job.status }}
-          text: '🚀 Déploiement Production ${{ job.status }}'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
   # Rollback en cas d'échec
   rollback:
     name: Rollback
@@ -195,10 +175,3 @@ jobs:
           # Ajoutez ici la logique de rollback
           # Exemple: déployer la version précédente
           echo "✅ Rollback terminé"
-
-      - name: Notification d'échec
-        uses: 8398a7/action-slack@v3
-        with:
-          status: 'failure'
-          text: '❌ Déploiement échoué - Rollback effectué'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}

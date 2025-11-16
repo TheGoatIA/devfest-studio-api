@@ -9,7 +9,7 @@ updates:
       time: "03:00"
       timezone: "Africa/Douala"
     target-branch: "dev"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 20
     reviewers:
       - "TheGoatIA"
     assignees:
@@ -42,7 +42,7 @@ updates:
       time: "03:00"
       timezone: "Africa/Douala"
     target-branch: "dev"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     reviewers:
       - "TheGoatIA"
     labels:
@@ -62,7 +62,7 @@ updates:
       time: "03:00"
       timezone: "Africa/Douala"
     target-branch: "dev"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 10
     reviewers:
       - "TheGoatIA"
     labels:
