@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configuration de Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -59,7 +59,7 @@ jobs:
               type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build et Push de l'image Docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
@@ -82,7 +82,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload des résultats du scan
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -99,10 +99,10 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configuration kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         if: false  # Activez si vous utilisez Kubernetes
 
       - name: Déploiement sur le serveur staging
@@ -131,7 +131,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Confirmation du déploiement
         run: |
@@ -154,7 +154,7 @@ jobs:
           # curl -f https://api.devfest-studio.example.com/api/v1/health
 
       - name: Création d'une release GitHub
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           generate_release_notes: true
