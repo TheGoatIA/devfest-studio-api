@@ -137,7 +137,7 @@ jobs:
           echo "📦 Taille du build: $BUILD_SIZE"
 
       - name: Upload des artifacts du build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dist
           path: dist/
@@ -168,7 +168,7 @@ jobs:
           outputs: type=docker,dest=/tmp/devfest-studio-api.tar
 
       - name: Upload de l'image Docker
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: docker-image
           path: /tmp/devfest-studio-api.tar
