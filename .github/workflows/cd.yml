@@ -154,7 +154,7 @@ jobs:
           # curl -f https://api.devfest-studio.example.com/api/v1/health
 
       - name: Création d'une release GitHub
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           generate_release_notes: true
