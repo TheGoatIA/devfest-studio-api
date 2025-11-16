@@ -55,26 +55,9 @@ jobs:
         run: npm install
 
       - name: Exécution des tests unitaires
-        run: npm test -- --coverage --testPathIgnorePatterns=integration
+        run: npm run test
         env:
           NODE_ENV: test
-
-      - name: Upload de la couverture de code
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-
-      - name: Archive des résultats de couverture
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 30
 
   # Job de tests d'intégration
   test-integration:
@@ -117,7 +100,7 @@ jobs:
         run: npm install
 
       - name: Exécution des tests d'intégration
-        run: npm test -- --testPathPattern=integration
+        run: npm test -- --testPathPatterns=integration
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://localhost:27017/devfest_studio_test
