@@ -1,6 +1,6 @@
 /**
  * Index des modèles MongoDB
- * 
+ *
  * Ce fichier centralise l'export de tous les modèles
  */
 

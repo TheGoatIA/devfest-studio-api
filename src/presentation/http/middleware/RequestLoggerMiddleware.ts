@@ -1,6 +1,6 @@
 /**
  * Middleware pour logger les requêtes HTTP
- * 
+ *
  * Ce middleware enregistre toutes les requêtes entrantes avec :
  * - Méthode HTTP
  * - URL
@@ -60,13 +60,8 @@ export function requestLogger(req: Request, res: Response, next: NextFunction): 
   res.send = function (data): Response {
     // Calculer la durée de traitement
     const duration = Date.now() - startTime;
-    
-    logRequest(
-      requestInfo.method,
-      requestInfo.url,
-      res.statusCode,
-      duration
-    );
+
+    logRequest(requestInfo.method, requestInfo.url, res.statusCode, duration);
 
     // Logger les détails en mode debug
     if (config.LOG_LEVEL === 'debug') {
@@ -103,11 +98,11 @@ export function requestLogger(req: Request, res: Response, next: NextFunction): 
 export function requestId(req: Request, res: Response, next: NextFunction): void {
   // Générer un ID unique (ou utiliser celui fourni par un load balancer)
   const id = req.get('X-Request-ID') || generateRequestId();
-  
+
   // Ajouter l'ID à la requête et à la réponse
   (req as any).requestId = id;
   res.set('X-Request-ID', id);
-  
+
   next();
 }
 
@@ -138,7 +133,7 @@ export function bodyParserErrorHandler(
       success: false,
       error: {
         code: 'INVALID_JSON',
-        message: 'Le corps de la requête n\'est pas un JSON valide',
+        message: "Le corps de la requête n'est pas un JSON valide",
       },
     });
     return;
@@ -155,12 +150,14 @@ export function uploadLogger(req: Request, _res: Response, next: NextFunction): 
     logger.info('📤 Upload de fichier détecté', {
       url: req.url,
       method: req.method,
-      file: req.file ? {
-        fieldname: req.file.fieldname,
-        originalname: req.file.originalname,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-      } : undefined,
+      file: req.file
+        ? {
+            fieldname: req.file.fieldname,
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+          }
+        : undefined,
       filesCount: req.files ? Object.keys(req.files).length : 0,
     });
   }

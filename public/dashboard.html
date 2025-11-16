@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevFest Studio - Dashboard en Temps Réel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.disconnected {
+            background: #ef4444;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-bar select,
+        .filter-bar input {
+            padding: 10px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .filter-bar select:focus,
+        .filter-bar input:focus {
+            border-color: #667eea;
+        }
+
+        .filter-bar button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .filter-bar button:hover {
+            background: #5568d3;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .image-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background: #f3f4f6;
+            overflow: hidden;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .badge.new {
+            background: rgba(16, 185, 129, 0.9);
+            animation: bounceIn 0.5s;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .timestamp {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .no-results svg {
+            width: 80px;
+            height: 80px;
+            opacity: 0.6;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 DevFest Studio Dashboard</h1>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="number" id="totalCount">0</div>
+                <div class="label">Total Images</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="newCount">0</div>
+                <div class="label">Nouvelles (24h)</div>
+            </div>
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Connecté</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filter-bar">
+            <select id="filterStatus">
+                <option value="">Tous les statuts</option>
+                <option value="completed">Complétées</option>
+                <option value="processing">En cours</option>
+                <option value="failed">Échouées</option>
+            </select>
+            <select id="filterStyle">
+                <option value="">Tous les styles</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="fantasy">Fantasy Art</option>
+                <option value="watercolor">Watercolor</option>
+                <option value="pixel">Pixel Art</option>
+                <option value="headshot">Pro Headshot</option>
+                <option value="noir">Film Noir</option>
+                <option value="vintage">Vintage Photo</option>
+                <option value="product">Product Shot</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Rechercher..." />
+            <button onclick="applyFilters()">Filtrer</button>
+            <button onclick="clearFilters()">Réinitialiser</button>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Chargement des transformations...</p>
+        </div>
+
+        <div id="gallery" class="gallery" style="display: none;"></div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p>Aucune transformation trouvée</p>
+            <p style="font-size: 14px; margin-top: 8px; opacity: 0.8;">Les nouvelles transformations apparaîtront ici en temps réel</p>
+        </div>
+    </div>
+
+    <script>
+        let transformations = [];
+        let eventSource = null;
+        let isConnected = false;
+
+        // Initialiser la connexion SSE
+        function initSSE() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource('/api/v1/events/stream');
+
+            eventSource.onopen = () => {
+                console.log('✅ Connexion SSE établie');
+                isConnected = true;
+                updateConnectionStatus(true);
+            };
+
+            eventSource.onmessage = (event) => {
+                console.log('📨 Message reçu:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    handleEvent(data);
+                } catch (error) {
+                    console.error('Erreur parsing message:', error);
+                }
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('❌ Erreur SSE:', error);
+                isConnected = false;
+                updateConnectionStatus(false);
+
+                // Reconnexion automatique après 5 secondes
+                setTimeout(() => {
+                    console.log('🔄 Tentative de reconnexion...');
+                    initSSE();
+                }, 5000);
+            };
+
+            // Écouter les événements spécifiques
+            eventSource.addEventListener('transformation.completed', (event) => {
+                console.log('✨ Transformation complétée:', event.data);
+                const data = JSON.parse(event.data);
+                addTransformation(data.data);
+            });
+        }
+
+        // Gérer les événements
+        function handleEvent(data) {
+            if (data.event === 'transformation.completed') {
+                addTransformation(data.data);
+            }
+        }
+
+        // Ajouter une transformation
+        function addTransformation(transformation) {
+            // Ajouter au début du tableau
+            transformations.unshift({
+                ...transformation,
+                isNew: true,
+                timestamp: new Date().toISOString()
+            });
+
+            // Retirer le flag "new" après 5 secondes
+            setTimeout(() => {
+                const index = transformations.findIndex(t => t.transformationId === transformation.transformationId);
+                if (index !== -1) {
+                    transformations[index].isNew = false;
+                    renderGallery();
+                }
+            }, 5000);
+
+            updateStats();
+            renderGallery();
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            document.getElementById('totalCount').textContent = transformations.length;
+
+            const now = Date.now();
+            const oneDayAgo = now - (24 * 60 * 60 * 1000);
+            const newCount = transformations.filter(t => new Date(t.timestamp).getTime() > oneDayAgo).length;
+            document.getElementById('newCount').textContent = newCount;
+        }
+
+        // Mettre à jour le statut de connexion
+        function updateConnectionStatus(connected) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+
+            if (connected) {
+                statusDot.classList.remove('disconnected');
+                statusText.textContent = 'Connecté';
+            } else {
+                statusDot.classList.add('disconnected');
+                statusText.textContent = 'Déconnecté';
+            }
+        }
+
+        // Rendre la galerie
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            const loading = document.getElementById('loading');
+            const noResults = document.getElementById('noResults');
+
+            loading.style.display = 'none';
+
+            if (transformations.length === 0) {
+                gallery.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            gallery.style.display = 'grid';
+            noResults.style.display = 'none';
+
+            gallery.innerHTML = transformations.map(t => `
+                <div class="image-card">
+                    <div class="image-container">
+                        <img src="${t.resultUrl || t.url || '/uploads/transformations/results/placeholder.jpg'}"
+                             alt="${t.styleId || 'Transformation'}"
+                             onerror="this.src='/uploads/transformations/results/placeholder.jpg'">
+                        ${t.isNew ? '<span class="badge new">🎉 NEW</span>' : ''}
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">
+                            Transformation ${t.transformationId ? t.transformationId.substring(0, 8) : 'N/A'}
+                        </div>
+                        <div class="card-meta">
+                            <span class="timestamp">
+                                🕐 ${formatTimestamp(t.timestamp)}
+                            </span>
+                            <span>✨ ${t.styleId || 'Custom'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Formater le timestamp
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now.getTime() - date.getTime();
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `Il y a ${days}j`;
+            if (hours > 0) return `Il y a ${hours}h`;
+            if (minutes > 0) return `Il y a ${minutes}min`;
+            return 'À l\'instant';
+        }
+
+        // Charger les transformations initiales
+        async function loadInitialTransformations() {
+            try {
+                const response = await fetch('/api/v1/transformations/recent');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        transformations = data.data.map(t => ({
+                            ...t,
+                            isNew: false
+                        }));
+                        updateStats();
+                        renderGallery();
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur chargement transformations:', error);
+                renderGallery();
+            }
+        }
+
+        // Appliquer les filtres
+        function applyFilters() {
+            // TODO: Implémenter les filtres
+            console.log('Filtres appliqués');
+        }
+
+        // Réinitialiser les filtres
+        function clearFilters() {
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterStyle').value = '';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Initialisation du dashboard...');
+            initSSE();
+            loadInitialTransformations();
+        });
+
+        // Nettoyage lors de la fermeture de la page
+        window.addEventListener('beforeunload', () => {
+            if (eventSource) {
+                eventSource.close();
+            }
+        });
+    </script>
+</body>
+</html>

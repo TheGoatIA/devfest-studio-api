@@ -1,6 +1,6 @@
 /**
  * Middleware de Validation
- * 
+ *
  * Valide les données des requêtes (body, query, params)
  * avec les schémas Joi définis
  */
@@ -25,12 +25,12 @@ interface ValidationOptions {
 
 /**
  * Créer un middleware de validation
- * 
+ *
  * @param schema - Schéma Joi à utiliser
  * @param source - Source des données à valider (body, query, params)
  * @param options - Options de validation
  * @returns Middleware Express
- * 
+ *
  * Utilisation:
  * router.post('/login',
  *   validate(authSchemas.createSession, 'body'),
@@ -59,7 +59,7 @@ export function validate(
 
     if (error) {
       // Formater les erreurs de validation
-      const errors = error.details.map(detail => ({
+      const errors = error.details.map((detail) => ({
         field: detail.path.join('.'),
         message: detail.message,
         type: detail.type,
@@ -98,10 +98,10 @@ export function validate(
 
 /**
  * Valider plusieurs sources en même temps
- * 
+ *
  * @param schemas - Objet avec les schémas pour chaque source
  * @returns Middleware Express
- * 
+ *
  * Utilisation:
  * router.put('/user/:id',
  *   validateMultiple({
@@ -131,12 +131,14 @@ export function validateMultiple(schemas: {
       });
 
       if (error) {
-        errors.push(...error.details.map(detail => ({
-          source,
-          field: detail.path.join('.'),
-          message: detail.message,
-          type: detail.type,
-        })));
+        errors.push(
+          ...error.details.map((detail) => ({
+            source,
+            field: detail.path.join('.'),
+            message: detail.message,
+            type: detail.type,
+          }))
+        );
       } else {
         // Remplacer avec les données validées
         req[source as ValidationSource] = value;
@@ -172,7 +174,7 @@ export function validateMultiple(schemas: {
 
 /**
  * Middleware pour valider les UUIDs dans les paramètres de route
- * 
+ *
  * Utilisation:
  * router.get('/user/:userId', validateUUID('userId'), ...)
  */
@@ -183,7 +185,7 @@ export function validateUUID(...paramNames: string[]) {
 
     for (const paramName of paramNames) {
       const value = req.params[paramName];
-      
+
       if (!value) {
         errors.push({
           field: paramName,

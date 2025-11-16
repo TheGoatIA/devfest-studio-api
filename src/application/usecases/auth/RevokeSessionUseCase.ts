@@ -1,6 +1,6 @@
 /**
  * Use Case: Révoquer une Session (Déconnexion)
- * 
+ *
  * Révoque une session active pour déconnecter l'utilisateur
  * Processus:
  * 1. Trouver la session
@@ -36,7 +36,7 @@ export interface RevokeSessionOutput {
 export class RevokeSessionUseCase {
   /**
    * Exécuter le use case
-   * 
+   *
    * @param input - Session à révoquer
    * @returns Confirmation de révocation
    */
@@ -53,7 +53,7 @@ export class RevokeSessionUseCase {
       if (input.revokeAll) {
         // Révoquer toutes les sessions de l'utilisateur
         revokedCount = await this.revokeAllSessions(input.userId);
-        
+
         logger.info('Toutes les sessions révoquées', {
           userId: input.userId,
           count: revokedCount,
@@ -67,7 +67,7 @@ export class RevokeSessionUseCase {
       } else {
         // Révoquer uniquement la session spécifique
         await this.revokeSession(input.sessionId, input.userId);
-        
+
         logger.info('Session révoquée', {
           sessionId: input.sessionId,
           userId: input.userId,
@@ -87,7 +87,7 @@ export class RevokeSessionUseCase {
 
   /**
    * Révoquer une session spécifique
-   * 
+   *
    * @param sessionId - ID de la session
    * @param userId - ID de l'utilisateur (pour vérification)
    */
@@ -97,7 +97,7 @@ export class RevokeSessionUseCase {
 
     // 2. Vérifier que la session appartient bien à l'utilisateur
     if (session.userId !== userId) {
-      logger.warn('Tentative de révocation d\'une session d\'un autre utilisateur', {
+      logger.warn("Tentative de révocation d'une session d'un autre utilisateur", {
         sessionId,
         sessionUserId: session.userId,
         requestUserId: userId,
@@ -114,7 +114,7 @@ export class RevokeSessionUseCase {
 
   /**
    * Révoquer toutes les sessions d'un utilisateur
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @returns Nombre de sessions révoquées
    */
@@ -135,7 +135,7 @@ export class RevokeSessionUseCase {
 
   /**
    * Supprimer une session du cache Redis
-   * 
+   *
    * @param sessionId - ID de la session
    */
   private async removeSessionFromCache(sessionId: string): Promise<void> {

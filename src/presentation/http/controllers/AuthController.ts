@@ -1,6 +1,6 @@
 /**
  * Controller d'Authentification
- * 
+ *
  * Gère tous les endpoints liés à l'authentification :
  * - Création de session (connexion)
  * - Validation de session
@@ -24,7 +24,7 @@ export class AuthController {
   /**
    * POST /api/v1/auth/session
    * Créer une nouvelle session (connexion)
-   * 
+   *
    * Body:
    * {
    *   "device_id": "string",
@@ -77,7 +77,7 @@ export class AuthController {
   /**
    * POST /api/v1/auth/validate
    * Valider une session existante
-   * 
+   *
    * Headers:
    * Authorization: Bearer <session_token>
    */
@@ -115,7 +115,7 @@ export class AuthController {
   /**
    * POST /api/v1/auth/refresh
    * Rafraîchir les tokens
-   * 
+   *
    * Body:
    * {
    *   "refresh_token": "string"
@@ -145,10 +145,10 @@ export class AuthController {
   /**
    * DELETE /api/v1/auth/logout
    * Déconnexion (révoquer la session)
-   * 
+   *
    * Headers:
    * Authorization: Bearer <session_token>
-   * 
+   *
    * Query params (optionnel):
    * ?all=true  // Pour révoquer toutes les sessions
    */
@@ -202,7 +202,7 @@ export class AuthController {
   /**
    * GET /api/v1/auth/sessions
    * Obtenir toutes les sessions actives de l'utilisateur
-   * 
+   *
    * Headers:
    * Authorization: Bearer <session_token>
    */
@@ -219,13 +219,15 @@ export class AuthController {
       }
 
       // Importer le repository
-      const { sessionRepository } = await import('../../../infrastructure/database/repositories/SessionRepository');
+      const { sessionRepository } = await import(
+        '../../../infrastructure/database/repositories/SessionRepository'
+      );
 
       // Récupérer les sessions
       const sessions = await sessionRepository.findActiveByUserId(req.user.userId);
 
       // Formater la réponse
-      const formattedSessions = sessions.map(session => ({
+      const formattedSessions = sessions.map((session) => ({
         session_id: session.sessionId,
         device: {
           platform: session.device.platform,

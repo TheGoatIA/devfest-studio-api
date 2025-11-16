@@ -1,6 +1,6 @@
 /**
  * Modèle Session - Sessions d'authentification
- * 
+ *
  * Ce modèle gère les sessions JWT des utilisateurs
  * Permet de tracker les connexions et de révoquer les tokens si nécessaire
  */
@@ -254,11 +254,7 @@ SessionSchema.index({ 'tokens.accessToken': 1, status: 1 });
  */
 SessionSchema.methods.isValid = function (): boolean {
   const now = new Date();
-  return (
-    this.status === 'active' &&
-    !this.security.isCompromised &&
-    this.expiresAt > now
-  );
+  return this.status === 'active' && !this.security.isCompromised && this.expiresAt > now;
 };
 
 /**
@@ -353,10 +349,7 @@ SessionSchema.statics.findActiveByUserId = function (userId: string) {
  * Révoquer toutes les sessions d'un utilisateur
  */
 SessionSchema.statics.revokeAllByUserId = async function (userId: string) {
-  return this.updateMany(
-    { userId, status: 'active' },
-    { $set: { status: 'revoked' } }
-  );
+  return this.updateMany({ userId, status: 'active' }, { $set: { status: 'revoked' } });
 };
 
 /**
@@ -367,10 +360,7 @@ SessionSchema.statics.cleanExpired = async function () {
   const now = new Date();
   const result = await this.updateMany(
     {
-      $or: [
-        { expiresAt: { $lt: now } },
-        { 'tokens.refreshTokenExpiry': { $lt: now } },
-      ],
+      $or: [{ expiresAt: { $lt: now } }, { 'tokens.refreshTokenExpiry': { $lt: now } }],
       status: 'active',
     },
     { $set: { status: 'expired' } }

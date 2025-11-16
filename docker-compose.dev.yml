@@ -1,0 +1,150 @@
+version: '3.9'
+
+services:
+  # Development API with hot-reload
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        NODE_ENV: development
+    image: devfest-studio-api:dev
+    container_name: devfest-studio-api-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Node.js debugger
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      HOST: 0.0.0.0
+
+      # MongoDB
+      MONGODB_URI: mongodb://mongodb:27017/devfest_studio_dev
+      MONGODB_DB_NAME: devfest_studio_dev
+
+      # Redis
+      REDIS_URL: redis://redis:6379
+
+      # JWT & Security
+      JWT_SECRET: ${JWT_SECRET:-devfest-studio-super-secret-jwt-key-development}
+      JWT_ACCESS_EXPIRY: 15m
+      JWT_REFRESH_EXPIRY: 7d
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-devfest-studio-encryption-key-32}
+
+      # Gemini AI
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: gemini-2.0-flash-exp
+      GEMINI_BASE_URL: https://generativelanguage.googleapis.com
+
+      # Storage
+      MAX_FILE_SIZE: 10485760
+      STORAGE_BUCKET: devfest-studio-uploads
+
+      # Logs
+      LOG_LEVEL: debug
+      ENABLE_REQUEST_LOGGING: true
+
+      # Rate Limiting (disabled in dev)
+      ENABLE_RATE_LIMIT: false
+
+      # CORS (allow all in dev)
+      ALLOWED_ORIGINS: "*"
+
+    volumes:
+      # Mount source code for hot-reload
+      - .:/app
+      - /app/node_modules
+      - uploads:/app/uploads
+
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    networks:
+      - devfest-network
+
+    command: npm run dev
+
+  # MongoDB for development
+  mongodb:
+    image: mongo:7.0
+    container_name: devfest-mongodb-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: devfest_studio_dev
+    volumes:
+      - mongodb_data_dev:/data/db
+    networks:
+      - devfest-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Redis for development
+  redis:
+    image: redis:7-alpine
+    container_name: devfest-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data_dev:/data
+    networks:
+      - devfest-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Mongo Express - Web-based MongoDB admin interface
+  mongo-express:
+    image: mongo-express:latest
+    container_name: devfest-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      - mongodb
+    networks:
+      - devfest-network
+    profiles:
+      - with-admin-ui
+
+  # Redis Commander - Web-based Redis admin interface
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: devfest-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - devfest-network
+    profiles:
+      - with-admin-ui
+
+volumes:
+  mongodb_data_dev:
+  redis_data_dev:
+  uploads:
+
+networks:
+  devfest-network:
+    driver: bridge

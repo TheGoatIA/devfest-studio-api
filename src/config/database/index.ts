@@ -1,6 +1,6 @@
 /**
  * Index des connexions aux bases de données
- * 
+ *
  * Ce fichier centralise l'export de toutes les connexions
  * et fournit une fonction pour initialiser toutes les bases en une fois
  */
@@ -12,20 +12,34 @@ import redisConnection from './redis';
 /**
  * Initialiser toutes les connexions aux bases de données
  * Cette fonction doit être appelée au démarrage de l'application
+ * Note: Redis est optionnel - l'application continue sans cache si non disponible
  */
 export async function initializeDatabases(): Promise<void> {
   try {
     logger.info('🔌 Initialisation des connexions aux bases de données...');
 
-    // Connexion à MongoDB
+    // Connexion à MongoDB (obligatoire)
     await mongoDBConnection.connect();
+    logger.info('✅ MongoDB connecté');
 
-    // Connexion à Redis
-    await redisConnection.connect();
+    // Connexion à Redis (optionnel - ne bloque pas l'application)
+    try {
+      await redisConnection.connect();
+      if (redisConnection.isHealthy()) {
+        logger.info('✅ Redis connecté - Cache activé');
+      } else {
+        logger.warn('⚠️  Redis non disponible - Mode sans cache');
+      }
+    } catch (redisError) {
+      logger.warn("⚠️  Redis non disponible - L'application continuera sans cache", {
+        error: redisError instanceof Error ? redisError.message : 'Erreur inconnue',
+      });
+      // Ne pas propager l'erreur - continuer sans Redis
+    }
 
-    logger.info('✅ Toutes les bases de données sont connectées');
+    logger.info('✅ Initialisation des bases de données terminée');
   } catch (error) {
-    logger.error('❌ Erreur lors de l\'initialisation des bases de données', { error });
+    logger.error("❌ Erreur critique lors de l'initialisation des bases de données", { error });
     throw error;
   }
 }
@@ -40,9 +54,22 @@ export async function closeDatabases(): Promise<void> {
 
     // Fermer MongoDB
     await mongoDBConnection.disconnect();
+    logger.info('✅ MongoDB déconnecté');
 
-    // Fermer Redis
-    await redisConnection.disconnect();
+    // Fermer Redis (si connecté)
+    try {
+      if (redisConnection.isHealthy()) {
+        await redisConnection.disconnect();
+        logger.info('✅ Redis déconnecté');
+      } else {
+        logger.debug("ℹ️  Redis n'était pas connecté");
+      }
+    } catch (redisError) {
+      logger.warn('⚠️  Erreur lors de la fermeture de Redis (ignorée)', {
+        error: redisError instanceof Error ? redisError.message : 'Erreur inconnue',
+      });
+      // Ne pas propager l'erreur
+    }
 
     logger.info('✅ Toutes les connexions sont fermées');
   } catch (error) {
@@ -53,6 +80,8 @@ export async function closeDatabases(): Promise<void> {
 
 /**
  * Vérifier la santé de toutes les bases de données
+ * Note: Seul MongoDB est critique pour la santé globale de l'application
+ * Redis est optionnel et son indisponibilité n'affecte pas le statut overall
  */
 export function checkDatabasesHealth(): {
   mongodb: boolean;
@@ -65,7 +94,7 @@ export function checkDatabasesHealth(): {
   return {
     mongodb: mongoHealth,
     redis: redisHealth,
-    overall: mongoHealth && redisHealth,
+    overall: mongoHealth, // Seul MongoDB est critique
   };
 }
 
@@ -74,10 +103,16 @@ export function checkDatabasesHealth(): {
  */
 export async function getDatabasesStats() {
   try {
-    const [mongoStats, redisStats] = await Promise.all([
-      mongoDBConnection.getStats(),
-      redisConnection.getStats(),
-    ]);
+    const mongoStats = await mongoDBConnection.getStats();
+
+    // Récupérer les stats Redis si disponible
+    let redisStats;
+    try {
+      redisStats = await redisConnection.getStats();
+    } catch (redisError) {
+      logger.debug('⚠️  Impossible de récupérer les stats Redis', { redisError });
+      redisStats = { isConnected: false, error: 'Redis non disponible' };
+    }
 
     return {
       mongodb: mongoStats,

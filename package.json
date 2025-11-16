@@ -13,9 +13,7 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
-    "seed": "ts-node scripts/seed-database.ts",
-    "migrate": "ts-node scripts/migrate-database.ts",
-    "health-check": "ts-node scripts/health-check.ts"
+    "seed": "ts-node scripts/seed-styles.ts"
   },
   "keywords": [
     "api",
@@ -31,6 +29,9 @@
   "dependencies": {
     "@google-ai/generativelanguage": "^3.5.0",
     "@google-cloud/storage": "^7.17.3",
+    "@google/genai": "^1.29.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -47,6 +48,7 @@
     "multer": "^2.0.2",
     "redis": "^5.9.0",
     "sharp": "^0.34.5",
+    "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tslib": "^2.8.1",
     "uuid": "^13.0.0",
