@@ -27,11 +27,29 @@ updates:
     allow:
       - dependency-type: "all"
     ignore:
-      # Ignorer les mises à jour majeures pour certains packages critiques
       - dependency-name: "mongoose"
         update-types: ["version-update:semver-major"]
       - dependency-name: "express"
         update-types: ["version-update:semver-major"]
+
+    # 👉 Les groupes doivent être ici (dans l'update npm)
+    groups:
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "ts-*"
+      testing:
+        patterns:
+          - "jest"
+          - "@types/jest"
+          - "supertest"
+          - "@types/supertest"
+      linting:
+        patterns:
+          - "eslint"
+          - "@typescript-eslint/*"
+          - "prettier"
 
   # Mises à jour GitHub Actions
   - package-ecosystem: "github-actions"
@@ -72,22 +90,3 @@ updates:
     commit-message:
       prefix: "chore(docker)"
       include: "scope"
-
-  # Groupes de dépendances pour regrouper les mises à jour similaires
-  groups:
-    typescript:
-      patterns:
-        - "typescript"
-        - "@types/*"
-        - "ts-*"
-    testing:
-      patterns:
-        - "jest"
-        - "@types/jest"
-        - "supertest"
-        - "@types/supertest"
-    linting:
-      patterns:
-        - "eslint"
-        - "@typescript-eslint/*"
-        - "prettier"
