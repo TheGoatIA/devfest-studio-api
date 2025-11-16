@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
 
       - name: Installation des dépendances
-        run: npm ci
+        run: npm install
 
       - name: Vérification du formatage (Prettier)
         run: npm run format -- --check || true
