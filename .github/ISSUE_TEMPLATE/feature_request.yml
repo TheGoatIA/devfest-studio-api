@@ -1,0 +1,122 @@
+name: ✨ Demande de Fonctionnalité
+description: Suggérer une nouvelle fonctionnalité ou amélioration
+title: "[FEATURE] : "
+labels: ["enhancement", "à trier"]
+assignees:
+  - TheGoatIA
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de proposer une nouvelle fonctionnalité !
+        Vos suggestions nous aident à améliorer l'API DevFest Studio.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème ou besoin
+      description: Quel problème cette fonctionnalité résoudrait-elle ?
+      placeholder: |
+        Ex: Je suis toujours frustré quand [...]
+        Ex: Il serait utile de pouvoir [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      description: Comment imaginez-vous cette fonctionnalité ?
+      placeholder: Décrivez la solution que vous aimeriez voir...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+      description: Avez-vous pensé à d'autres solutions ?
+      placeholder: Décrivez les alternatives que vous avez envisagées...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      description: Quelle est l'importance de cette fonctionnalité pour vous ?
+      options:
+        - Critique (bloquant pour mon utilisation)
+        - Haute (très utile)
+        - Moyenne (amélioration appréciable)
+        - Basse (nice-to-have)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Catégorie
+      description: À quelle partie de l'API cette fonctionnalité se rapporte-t-elle ?
+      options:
+        - Photos
+        - Transformations
+        - Styles
+        - Authentification
+        - Gallery
+        - API/Endpoints
+        - Performance
+        - Sécurité
+        - Documentation
+        - DevOps/Infrastructure
+        - Autre
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Cas d'utilisation
+      description: Comment utiliseriez-vous cette fonctionnalité ?
+      placeholder: |
+        1. En tant qu'utilisateur, je voudrais...
+        2. Cela me permettrait de...
+        3. Le résultat attendu serait...
+
+  - type: textarea
+    id: technical-details
+    attributes:
+      label: Détails techniques
+      description: Si vous avez des idées sur l'implémentation technique
+      placeholder: |
+        - API endpoints à créer
+        - Modifications de base de données
+        - Dépendances nécessaires
+        - etc.
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups ou exemples
+      description: Screenshots, schémas, exemples de code, etc.
+      placeholder: |
+        Ajoutez des images, du code exemple, ou des liens vers des exemples similaires...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Seriez-vous prêt(e) à contribuer ?
+      options:
+        - label: Je serais prêt(e) à implémenter cette fonctionnalité
+        - label: Je peux aider à la tester
+        - label: Je peux aider à la documenter
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: J'ai vérifié qu'il n'existe pas déjà une demande similaire
+          required: true
+        - label: J'ai consulté la documentation pour voir si cette fonctionnalité existe déjà
+          required: true

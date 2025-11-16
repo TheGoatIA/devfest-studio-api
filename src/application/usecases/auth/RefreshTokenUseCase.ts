@@ -1,6 +1,6 @@
 /**
  * Use Case: Rafraîchir les Tokens
- * 
+ *
  * Permet de renouveler les tokens avec un refresh token
  * Processus:
  * 1. Vérifier le refresh token
@@ -37,7 +37,7 @@ export interface RefreshTokenOutput {
 export class RefreshTokenUseCase {
   /**
    * Exécuter le use case
-   * 
+   *
    * @param input - Refresh token
    * @returns Nouveaux tokens
    * @throws AuthenticationError si le refresh token est invalide
@@ -69,7 +69,7 @@ export class RefreshTokenUseCase {
 
       // 3. Vérifier que la session est valide
       if (!session.isValid()) {
-        logger.warn('Tentative de rafraîchissement d\'une session invalide', {
+        logger.warn("Tentative de rafraîchissement d'une session invalide", {
           sessionId: session.sessionId,
           status: session.status,
         });
@@ -144,7 +144,7 @@ export class RefreshTokenUseCase {
 
   /**
    * Mettre à jour la session dans le cache Redis
-   * 
+   *
    * @param sessionId - ID de la session
    * @param data - Nouvelles données
    */

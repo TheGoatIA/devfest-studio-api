@@ -1,13 +1,16 @@
 /**
  * Point d'entrée principal de l'application DevFest Studio API
- * 
+ *
  * Ce fichier initialise l'application Express et démarre le serveur
  */
 
 import express, { Application } from 'express';
 import compression from 'compression';
+import swaggerUi from 'swagger-ui-express';
+import path from 'path';
 import logger from './config/logger';
 import { config } from './config/environment';
+import { swaggerSpec } from './config/swagger';
 import { initializeDatabases, closeDatabases, checkDatabasesHealth } from './config/database';
 import {
   setupSecurityMiddleware,
@@ -35,7 +38,7 @@ async function startServer(): Promise<void> {
     ╚═══════════════════════════════════════════════════════╝
     `);
 
-    logger.info('🚀 Démarrage de l\'application...');
+    logger.info("🚀 Démarrage de l'application...");
 
     // ========== INITIALISATION DES BASES DE DONNÉES ==========
     logger.info('📦 Initialisation des bases de données...');
@@ -46,7 +49,7 @@ async function startServer(): Promise<void> {
     const app: Application = express();
 
     // ========== MIDDLEWARES GLOBAUX ==========
-    
+
     // 1. Sécurité (Helmet + CORS)
     setupSecurityMiddleware(app);
 
@@ -63,18 +66,105 @@ async function startServer(): Promise<void> {
     // 5. Logger les requêtes
     app.use(requestLogger);
 
+    // ========== FICHIERS STATIQUES (UPLOADS) ==========
+
+    // Servir les fichiers uploadés (photos et transformations)
+    const uploadsPath = path.join(process.cwd(), 'uploads');
+    app.use('/uploads', express.static(uploadsPath));
+
+    // Servir le dossier public (pour le dashboard)
+    const publicPath = path.join(process.cwd(), 'public');
+    app.use('/public', express.static(publicPath));
+
+    logger.info('📁 Fichiers statiques configurés', { uploadsPath, publicPath });
+
+    // ========== SWAGGER DOCUMENTATION ==========
+
+    // Swagger JSON endpoint (avant Swagger UI pour éviter les conflits)
+    app.get('/api/v1/docs.json', (_req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'inline; filename="devfest-studio-api.json"');
+      res.send(swaggerSpec);
+    });
+
+    // Swagger UI avec bouton de téléchargement
+    app.use(
+      '/api/v1/docs',
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpec, {
+        customCss: `
+          .swagger-ui .topbar { display: none }
+          .swagger-ui .info {
+            margin-bottom: 20px;
+          }
+          .download-json-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background-color: #4990e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.2s;
+          }
+          .download-json-button:hover {
+            background-color: #357abd;
+          }
+        `,
+        customSiteTitle: 'DevFest Studio API Docs',
+        customfavIcon: '/favicon.ico',
+        swaggerOptions: {
+          persistAuthorization: true,
+          displayRequestDuration: true,
+          filter: true,
+          tryItOutEnabled: true,
+        },
+        customJs: '/api/v1/swagger-custom.js',
+      })
+    );
+
+    // Script personnalisé pour le bouton de téléchargement
+    app.get('/api/v1/swagger-custom.js', (_req, res) => {
+      res.setHeader('Content-Type', 'application/javascript');
+      res.send(`
+        (function() {
+          // Attendre que Swagger UI soit chargé
+          setTimeout(function() {
+            // Créer le bouton de téléchargement
+            var downloadButton = document.createElement('a');
+            downloadButton.href = '/api/v1/docs.json';
+            downloadButton.download = 'devfest-studio-api.json';
+            downloadButton.className = 'download-json-button';
+            downloadButton.innerHTML = '📥 Télécharger JSON';
+            downloadButton.title = 'Télécharger la spécification OpenAPI en JSON';
+
+            // Ajouter le bouton au DOM
+            document.body.appendChild(downloadButton);
+          }, 500);
+        })();
+      `);
+    });
+
+    logger.info('📚 Swagger documentation configuré sur /api/v1/docs');
+
     // ========== ROUTES API ==========
-    
+
     // Importer toutes les routes
     const apiRoutes = require('./presentation/http/routes').default;
-    
+
     // Monter les routes sur /api/v1
     app.use('/api/v1', apiRoutes);
 
     // Route de test simple
     app.get('/api/v1/health', async (_req, res) => {
       const dbHealth = checkDatabasesHealth();
-      
+
       res.json({
         success: true,
         message: 'DevFest Studio API fonctionne correctement! 🎉',
@@ -97,11 +187,17 @@ async function startServer(): Promise<void> {
         message: '🎨 Bienvenue sur DevFest Studio API',
         documentation: '/api/v1/docs',
         health: '/api/v1/health',
+        dashboard: '/dashboard',
       });
     });
 
+    // Route pour le dashboard en temps réel
+    app.get('/dashboard', (_req, res) => {
+      res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
+    });
+
     // ========== GESTION DES ERREURS ==========
-    
+
     // Route non trouvée (404) - doit être APRÈS toutes les routes
     app.use(notFoundHandler);
 
@@ -117,7 +213,8 @@ async function startServer(): Promise<void> {
       logger.info(`📍 URL: http://${config.HOST}:${config.PORT}`);
       logger.info(`🌍 Environnement: ${config.NODE_ENV}`);
       logger.info(`📝 Health check: http://${config.HOST}:${config.PORT}/api/v1/health`);
-      
+      logger.info(`📚 Documentation API: http://${config.HOST}:${config.PORT}/api/v1/docs`);
+
       // Log supplémentaires en développement
       if (config.NODE_ENV === 'development') {
         logger.info('');
@@ -154,7 +251,6 @@ async function startServer(): Promise<void> {
       });
       process.exit(1);
     });
-
   } catch (error) {
     logger.error('❌ Erreur fatale au démarrage', { error });
     process.exit(1);

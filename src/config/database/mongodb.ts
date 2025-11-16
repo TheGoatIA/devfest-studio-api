@@ -1,6 +1,6 @@
 /**
  * Configuration et connexion à MongoDB avec Mongoose
- * 
+ *
  * Ce fichier gère :
  * - La connexion à MongoDB
  * - Les événements de connexion/déconnexion
@@ -19,16 +19,16 @@ import { config } from '../environment';
 const mongooseOptions: mongoose.ConnectOptions = {
   // Nom de la base de données
   dbName: config.MONGODB_DB_NAME,
-  
+
   // Options de connexion
   maxPoolSize: 10, // Nombre maximum de connexions simultanées
-  minPoolSize: 2,  // Nombre minimum de connexions à maintenir
+  minPoolSize: 2, // Nombre minimum de connexions à maintenir
   socketTimeoutMS: 45000, // Timeout pour les opérations socket
   serverSelectionTimeoutMS: 5000, // Timeout pour sélectionner un serveur
-  
+
   // Options de retry
   retryWrites: true, // Réessayer automatiquement les écritures échouées
-  retryReads: true,  // Réessayer automatiquement les lectures échouées
+  retryReads: true, // Réessayer automatiquement les lectures échouées
 };
 
 /**
@@ -45,7 +45,7 @@ class MongoDBConnection {
   async connect(): Promise<void> {
     try {
       logger.info('📦 Connexion à MongoDB en cours...');
-      
+
       // Désactiver les warnings Mongoose obsolètes
       mongoose.set('strictQuery', false);
 
@@ -60,16 +60,15 @@ class MongoDBConnection {
 
       logger.info('✅ Connexion à MongoDB établie avec succès');
       logger.info(`📊 Base de données: ${config.MONGODB_DB_NAME}`);
-      
+
       // Afficher les collections disponibles en développement
       if (config.NODE_ENV === 'development') {
         const collections = await mongoose.connection.db!.listCollections().toArray();
         logger.debug('📋 Collections disponibles:', {
           count: collections.length,
-          names: collections.map(c => c.name),
+          names: collections.map((c) => c.name),
         });
       }
-
     } catch (error) {
       this.isConnected = false;
       this.connectionAttempts++;
@@ -84,12 +83,12 @@ class MongoDBConnection {
       if (this.connectionAttempts < this.maxRetries) {
         const retryDelay = this.connectionAttempts * 2000; // Délai croissant
         logger.info(`🔄 Nouvelle tentative dans ${retryDelay / 1000}s...`);
-        
+
         setTimeout(() => {
           this.connect();
         }, retryDelay);
       } else {
-        logger.error('❌ Nombre maximum de tentatives atteint. Arrêt de l\'application.');
+        logger.error("❌ Nombre maximum de tentatives atteint. Arrêt de l'application.");
         throw new Error('Impossible de se connecter à MongoDB');
       }
     }
@@ -133,7 +132,7 @@ class MongoDBConnection {
    */
   async disconnect(): Promise<void> {
     if (!this.isConnected) {
-      logger.warn('⚠️  MongoDB n\'est pas connecté');
+      logger.warn("⚠️  MongoDB n'est pas connecté");
       return;
     }
 

@@ -1,6 +1,6 @@
 /**
  * Configuration du système de logs avec Winston
- * 
+ *
  * Ce fichier configure Winston pour :
  * - Logger les informations importantes de l'application
  * - Créer des fichiers de logs séparés par niveau (error, combined)
@@ -49,25 +49,25 @@ winston.addColors(colors);
 const logFormat = winston.format.combine(
   // Ajouter un timestamp au format ISO
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  
+
   // Capturer les erreurs avec leur stack trace
   winston.format.errors({ stack: true }),
-  
+
   // Convertir les objets en JSON lisible
   winston.format.json(),
-  
+
   // Format final du message
   winston.format.printf((info) => {
     const { timestamp, level, message, ...meta } = info;
-    
+
     // Message de base avec timestamp et niveau
     let log = `[${timestamp}] ${level.toUpperCase()}: ${message}`;
-    
+
     // Ajouter les métadonnées s'il y en a
     if (Object.keys(meta).length > 0) {
       log += ` ${JSON.stringify(meta, null, 2)}`;
     }
-    
+
     return log;
   })
 );
@@ -82,12 +82,12 @@ const consoleFormat = winston.format.combine(
   winston.format.printf((info) => {
     const { timestamp, level, message, ...meta } = info;
     let log = `${timestamp} ${level}: ${message}`;
-    
+
     // Afficher les métadonnées de manière plus compacte en console
     if (Object.keys(meta).length > 0) {
       log += ` ${JSON.stringify(meta)}`;
     }
-    
+
     return log;
   })
 );
@@ -103,13 +103,13 @@ const logsDir = path.join(process.cwd(), 'logs');
 const logger = winston.createLogger({
   // Niveau de log par défaut (peut être surchargé par la variable d'environnement)
   level: process.env.LOG_LEVEL || 'info',
-  
+
   // Niveaux personnalisés
   levels,
-  
+
   // Format des logs
   format: logFormat,
-  
+
   // Destinations des logs (transports)
   transports: [
     // 1. Fichier pour toutes les erreurs
@@ -119,7 +119,7 @@ const logger = winston.createLogger({
       maxsize: 5242880, // 5MB
       maxFiles: 5, // Garder 5 fichiers maximum
     }),
-    
+
     // 2. Fichier pour tous les logs
     new winston.transports.File({
       filename: path.join(logsDir, 'combined.log'),
@@ -127,7 +127,7 @@ const logger = winston.createLogger({
       maxFiles: 5,
     }),
   ],
-  
+
   // Options supplémentaires
   exitOnError: false, // Ne pas quitter en cas d'erreur de log
 });

@@ -1,0 +1,92 @@
+version: 2
+
+updates:
+  # Mises à jour npm - vers la branche dev
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "03:00"
+      timezone: "Africa/Douala"
+    target-branch: "dev"
+    open-pull-requests-limit: 20
+    reviewers:
+      - "TheGoatIA"
+    assignees:
+      - "TheGoatIA"
+    labels:
+      - "dépendances"
+      - "npm"
+      - "auto-update"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "/"
+    versioning-strategy: "increase"
+    allow:
+      - dependency-type: "all"
+    ignore:
+      - dependency-name: "mongoose"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "express"
+        update-types: ["version-update:semver-major"]
+
+    # 👉 Les groupes doivent être ici (dans l'update npm)
+    groups:
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "ts-*"
+      testing:
+        patterns:
+          - "jest"
+          - "@types/jest"
+          - "supertest"
+          - "@types/supertest"
+      linting:
+        patterns:
+          - "eslint"
+          - "@typescript-eslint/*"
+          - "prettier"
+
+  # Mises à jour GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Africa/Douala"
+    target-branch: "dev"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "TheGoatIA"
+    labels:
+      - "dépendances"
+      - "github-actions"
+      - "auto-update"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+
+  # Mises à jour Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "03:00"
+      timezone: "Africa/Douala"
+    target-branch: "dev"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "TheGoatIA"
+    labels:
+      - "dépendances"
+      - "docker"
+      - "auto-update"
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"

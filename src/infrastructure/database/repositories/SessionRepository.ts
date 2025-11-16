@@ -1,18 +1,22 @@
 /**
  * Session Repository - Gestion de l'accès aux données des sessions
- * 
+ *
  * Ce repository abstrait toutes les opérations sur la collection Session
  */
 
 import { v4 as uuidv4 } from 'uuid';
 import { SessionModel, ISession } from '../mongodb/models/SessionModel';
 import logger from '../../../config/logger';
-import { NotFoundError, AuthenticationError } from '../../../presentation/http/middleware/ErrorHandlerMiddleware';
+import {
+  NotFoundError,
+  AuthenticationError,
+} from '../../../presentation/http/middleware/ErrorHandlerMiddleware';
 
 /**
  * DTO pour créer une session
  */
 export interface CreateSessionDTO {
+  sessionId?: string; // Optionnel - sera généré si non fourni
   userId: string;
   deviceId: string;
   accessToken: string;
@@ -43,14 +47,14 @@ export interface CreateSessionDTO {
 export class SessionRepository {
   /**
    * Créer une nouvelle session
-   * 
+   *
    * @param data - Données pour créer la session
    * @returns Session créée
    */
   async create(data: CreateSessionDTO): Promise<ISession> {
     try {
       const session = new SessionModel({
-        sessionId: uuidv4(),
+        sessionId: data.sessionId || uuidv4(), // Utiliser le sessionId fourni ou en générer un nouveau
         userId: data.userId,
         deviceId: data.deviceId,
         tokens: {
@@ -92,14 +96,14 @@ export class SessionRepository {
 
   /**
    * Trouver une session par son ID
-   * 
+   *
    * @param sessionId - ID de la session
    * @returns Session trouvée
    * @throws NotFoundError si non trouvée
    */
   async findById(sessionId: string): Promise<ISession> {
     const session = await SessionModel.findBySessionId(sessionId);
-    
+
     if (!session) {
       throw new NotFoundError('Session');
     }
@@ -109,7 +113,7 @@ export class SessionRepository {
 
   /**
    * Trouver une session par son access token
-   * 
+   *
    * @param accessToken - Access token
    * @returns Session trouvée ou null
    */
@@ -119,7 +123,7 @@ export class SessionRepository {
 
   /**
    * Trouver une session par son refresh token
-   * 
+   *
    * @param refreshToken - Refresh token
    * @returns Session trouvée ou null
    */
@@ -133,7 +137,7 @@ export class SessionRepository {
   /**
    * Valider une session
    * Vérifie que la session est active et non compromise
-   * 
+   *
    * @param sessionId - ID de la session
    * @throws AuthenticationError si session invalide
    */
@@ -141,7 +145,7 @@ export class SessionRepository {
     const session = await this.findById(sessionId);
 
     if (!session.isValid()) {
-      logger.warn('Tentative d\'utilisation d\'une session invalide', {
+      logger.warn("Tentative d'utilisation d'une session invalide", {
         sessionId,
         status: session.status,
         isCompromised: session.security.isCompromised,
@@ -156,7 +160,7 @@ export class SessionRepository {
 
   /**
    * Mettre à jour les tokens d'une session
-   * 
+   *
    * @param sessionId - ID de la session
    * @param tokens - Nouveaux tokens
    */
@@ -188,7 +192,7 @@ export class SessionRepository {
 
   /**
    * Mettre à jour l'activité d'une session
-   * 
+   *
    * @param sessionId - ID de la session
    * @param feature - Fonctionnalité utilisée (optionnel)
    */
@@ -200,7 +204,7 @@ export class SessionRepository {
 
   /**
    * Obtenir toutes les sessions actives d'un utilisateur
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @returns Liste des sessions actives
    */
@@ -210,7 +214,7 @@ export class SessionRepository {
 
   /**
    * Révoquer une session
-   * 
+   *
    * @param sessionId - ID de la session
    */
   async revoke(sessionId: string): Promise<void> {
@@ -224,7 +228,7 @@ export class SessionRepository {
   /**
    * Révoquer toutes les sessions d'un utilisateur
    * Utile pour déconnexion globale ou sécurité
-   * 
+   *
    * @param userId - ID de l'utilisateur
    */
   async revokeAllByUserId(userId: string): Promise<number> {
@@ -240,7 +244,7 @@ export class SessionRepository {
 
   /**
    * Révoquer toutes les sessions d'un utilisateur sauf celle en cours
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @param currentSessionId - ID de la session à conserver
    */
@@ -265,7 +269,7 @@ export class SessionRepository {
 
   /**
    * Marquer une session comme compromise
-   * 
+   *
    * @param sessionId - ID de la session
    */
   async markAsCompromised(sessionId: string): Promise<void> {
@@ -279,12 +283,12 @@ export class SessionRepository {
   /**
    * Nettoyer les sessions expirées
    * À appeler périodiquement (ex: via un cron job)
-   * 
+   *
    * @returns Nombre de sessions nettoyées
    */
   async cleanExpired(): Promise<number> {
     const count = await SessionModel.cleanExpired();
-    
+
     if (count > 0) {
       logger.info('Sessions expirées nettoyées', { count });
     }
@@ -294,13 +298,13 @@ export class SessionRepository {
 
   /**
    * Supprimer les anciennes sessions expirées
-   * 
+   *
    * @param daysOld - Nombre de jours
    * @returns Nombre de sessions supprimées
    */
   async deleteOldExpired(daysOld: number = 30): Promise<number> {
     const count = await SessionModel.deleteOldExpired(daysOld);
-    
+
     if (count > 0) {
       logger.info('Anciennes sessions supprimées', { count, daysOld });
     }
@@ -310,7 +314,7 @@ export class SessionRepository {
 
   /**
    * Compter les sessions actives
-   * 
+   *
    * @returns Nombre de sessions actives
    */
   async countActive(): Promise<number> {
@@ -319,7 +323,7 @@ export class SessionRepository {
 
   /**
    * Compter les sessions d'un utilisateur
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @returns Nombre de sessions
    */
@@ -332,7 +336,7 @@ export class SessionRepository {
 
   /**
    * Vérifier si un utilisateur a trop de sessions actives
-   * 
+   *
    * @param userId - ID de l'utilisateur
    * @param maxSessions - Nombre maximum de sessions autorisées
    * @returns true si trop de sessions
@@ -344,7 +348,7 @@ export class SessionRepository {
 
   /**
    * Supprimer la session la plus ancienne d'un utilisateur
-   * 
+   *
    * @param userId - ID de l'utilisateur
    */
   async deleteOldestSession(userId: string): Promise<void> {
@@ -373,7 +377,7 @@ export class SessionRepository {
 
   /**
    * Obtenir des informations détaillées sur une session
-   * 
+   *
    * @param sessionId - ID de la session
    * @returns Informations de la session
    */

@@ -1,0 +1,74 @@
+name: 📚 Documentation
+description: Signaler un problème de documentation ou suggérer une amélioration
+title: "[DOCS] : "
+labels: ["documentation", "à trier"]
+assignees:
+  - TheGoatIA
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de nous aider à améliorer la documentation !
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type de problème
+      description: Quel type de problème de documentation ?
+      options:
+        - Information manquante
+        - Information incorrecte
+        - Information obsolète
+        - Exemple manquant
+        - Exemple incorrect
+        - Typo ou erreur grammaticale
+        - Amélioration de clarté
+        - Traduction
+        - Autre
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Emplacement
+      description: Où se trouve le problème ?
+      placeholder: ex. README.md ligne 42, /docs/api/photos.md, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Contenu actuel
+      description: Quel est le contenu actuel problématique ?
+      placeholder: Copiez le texte actuel ici...
+      render: markdown
+
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Contenu suggéré
+      description: Comment devrait-il être corrigé ou amélioré ?
+      placeholder: Proposez le nouveau texte ici...
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte supplémentaire
+      description: Pourquoi ce changement est-il nécessaire ?
+      placeholder: Expliquez le contexte...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: J'ai vérifié qu'il n'existe pas déjà une issue similaire
+          required: true
+        - label: Je propose une amélioration constructive
+          required: true

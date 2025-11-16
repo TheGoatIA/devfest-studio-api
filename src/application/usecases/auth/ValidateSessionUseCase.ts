@@ -1,6 +1,6 @@
 /**
  * Use Case: Valider une Session
- * 
+ *
  * Vérifie qu'une session est valide et active
  * Processus:
  * 1. Vérifier le cache Redis d'abord (rapide)
@@ -48,7 +48,7 @@ export interface ValidateSessionOutput {
 export class ValidateSessionUseCase {
   /**
    * Exécuter le use case
-   * 
+   *
    * @param input - Token à valider
    * @returns Informations de session si valide
    * @throws AuthenticationError si invalide
@@ -145,7 +145,7 @@ export class ValidateSessionUseCase {
 
   /**
    * Récupérer une session du cache Redis
-   * 
+   *
    * @param sessionId - ID de la session
    * @returns Données en cache ou null
    */
@@ -161,7 +161,7 @@ export class ValidateSessionUseCase {
 
   /**
    * Mettre en cache une session
-   * 
+   *
    * @param sessionId - ID de la session
    * @param data - Données à mettre en cache
    */

@@ -1,6 +1,6 @@
 /**
  * Modèle User - Utilisateurs de l'application
- * 
+ *
  * Ce modèle représente un utilisateur dans la base de données.
  * Chaque utilisateur est identifié par son device_id (approche sans compte)
  */

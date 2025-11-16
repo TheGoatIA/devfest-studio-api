@@ -1,0 +1,190 @@
+version: '3.9'
+
+services:
+  # Application API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    image: devfest-studio-api:latest
+    container_name: devfest-studio-api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:8080"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 8080
+      HOST: 0.0.0.0
+
+      # MongoDB
+      MONGODB_URI: mongodb://mongodb:27017/devfest_studio
+      MONGODB_DB_NAME: devfest_studio
+
+      # Redis
+      REDIS_URL: redis://redis:6379
+
+      # JWT & Security
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+
+      # Gemini AI
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash-exp}
+      GEMINI_BASE_URL: ${GEMINI_BASE_URL:-https://generativelanguage.googleapis.com}
+
+      # Storage
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-devfest-studio-uploads}
+
+      # Logs
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENABLE_REQUEST_LOGGING: ${ENABLE_REQUEST_LOGGING:-true}
+
+      # Rate Limiting
+      ENABLE_RATE_LIMIT: ${ENABLE_RATE_LIMIT:-true}
+
+      # CORS
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
+
+    volumes:
+      # Persistent storage for uploads
+      - uploads:/app/uploads
+      # Logs
+      - ./logs:/app/logs
+
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    networks:
+      - devfest-network
+
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=api"
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: devfest-mongodb
+    restart: unless-stopped
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    environment:
+      MONGO_INITDB_DATABASE: devfest_studio
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      # MongoDB init script if needed
+      # - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - devfest-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=mongodb"
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: devfest-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - devfest-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+        labels: "service=redis"
+
+# Named Volumes for persistence
+volumes:
+  mongodb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/mongodb
+  mongodb_config:
+    driver: local
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/redis
+  uploads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./uploads
+
+# Custom network
+networks:
+  devfest-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
