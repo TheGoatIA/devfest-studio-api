@@ -52,7 +52,7 @@ jobs:
           cache: 'npm'
 
       - name: Installation des dépendances
-        run: npm ci
+        run: npm install
 
       - name: Exécution des tests unitaires
         run: npm test -- --coverage --testPathIgnorePatterns=integration
@@ -114,7 +114,7 @@ jobs:
           cache: 'npm'
 
       - name: Installation des dépendances
-        run: npm ci
+        run: npm install
 
       - name: Exécution des tests d'intégration
         run: npm test -- --testPathPattern=integration
@@ -143,7 +143,7 @@ jobs:
           cache: 'npm'
 
       - name: Installation des dépendances
-        run: npm ci
+        run: npm install
 
       - name: Build de l'application
         run: npm run build
