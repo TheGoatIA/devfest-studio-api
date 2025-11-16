@@ -102,7 +102,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configuration kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         if: false  # Activez si vous utilisez Kubernetes
 
       - name: Déploiement sur le serveur staging
