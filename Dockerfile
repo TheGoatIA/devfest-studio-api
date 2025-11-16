@@ -9,7 +9,7 @@ COPY tsconfig.json ./
 
 # Install dependencies (with cache mount for faster builds)
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --only=production=false
+  npm install --only=production=false
 
 # Copy source code
 COPY src/ ./src/
@@ -31,7 +31,7 @@ RUN apk add --no-cache dumb-init
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S -u 1001 -G nodejs nodejs
+  adduser -S -u 1001 -G nodejs nodejs
 
 # Copy built application from builder
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
