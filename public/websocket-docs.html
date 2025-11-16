@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation WebSocket/SSE - DevFest Studio API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .nav {
+            background: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #764ba2;
+        }
+
+        .content {
+            background: white;
+            margin: 2rem auto;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .event-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .event-card h4 {
+            color: #28a745;
+            margin-bottom: 0.5rem;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .inline-code {
+            background: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            color: #e83e8c;
+            font-family: 'Courier New', monospace;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .test-panel {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .test-panel h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 1rem 0;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot.green {
+            background: #28a745;
+        }
+
+        .dot.red {
+            background: #dc3545;
+        }
+
+        #events-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .event-log-entry {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-left: 3px solid #667eea;
+            background: white;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🔌 Documentation WebSocket/SSE</h1>
+            <p class="subtitle">Intégration des événements temps réel - DevFest Studio API</p>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-links">
+                <a href="#overview">Vue d'ensemble</a>
+                <a href="#events">Événements</a>
+                <a href="#integration">Intégration</a>
+                <a href="#test">Test en direct</a>
+                <a href="#examples">Exemples</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="content">
+            <!-- Vue d'ensemble -->
+            <section id="overview" class="section">
+                <h2>Vue d'ensemble</h2>
+                <p>L'API DevFest Studio utilise <strong>Server-Sent Events (SSE)</strong> pour envoyer des notifications en temps réel. Les SSE permettent au serveur d'envoyer des mises à jour aux clients sans que ceux-ci aient besoin de faire des requêtes répétées (polling).</p>
+
+                <div class="endpoint">
+                    <p><strong>Endpoint principal :</strong></p>
+                    <p class="endpoint-url">GET /api/v1/events/stream</p>
+                    <p><strong>Type :</strong> text/event-stream</p>
+                </div>
+
+                <h3>SSE vs WebSocket</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Caractéristique</th>
+                            <th>SSE</th>
+                            <th>WebSocket</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Direction</td>
+                            <td>Unidirectionnel (Serveur → Client)</td>
+                            <td>Bidirectionnel (Serveur ↔ Client)</td>
+                        </tr>
+                        <tr>
+                            <td>Protocole</td>
+                            <td>HTTP</td>
+                            <td>WebSocket</td>
+                        </tr>
+                        <tr>
+                            <td>Reconnexion</td>
+                            <td>Automatique</td>
+                            <td>Manuelle</td>
+                        </tr>
+                        <tr>
+                            <td>Support navigateurs</td>
+                            <td>Excellent</td>
+                            <td>Excellent</td>
+                        </tr>
+                        <tr>
+                            <td>Simplicité</td>
+                            <td>Simple</td>
+                            <td>Plus complexe</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Événements -->
+            <section id="events" class="section">
+                <h2>Événements disponibles</h2>
+
+                <div class="event-card">
+                    <h4><span class="badge badge-success">photo.uploaded</span></h4>
+                    <p>Émis quand une photo est uploadée avec succès</p>
+                    <pre><code>{
+  "event": "photo.uploaded",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "userId": "user123",
+  "data": {
+    "photoId": "photo-abc123",
+    "userId": "user123",
+    "photoUrl": "https://api.example.com/uploads/photos/photo.jpg",
+    "thumbnailUrl": "https://api.example.com/uploads/photos/thumbnails/photo.jpg"
+  }
+}</code></pre>
+                </div>
+
+                <div class="event-card">
+                    <h4><span class="badge badge-info">transformation.started</span></h4>
+                    <p>Émis quand une transformation d'image commence</p>
+                    <pre><code>{
+  "event": "transformation.started",
+  "timestamp": "2024-01-15T10:40:00.000Z",
+  "userId": "user123",
+  "data": {
+    "transformationId": "trans-xyz789",
+    "photoId": "photo-abc123",
+    "styleId": "vintage"
+  }
+}</code></pre>
+                </div>
+
+                <div class="event-card">
+                    <h4><span class="badge badge-success">transformation.completed</span></h4>
+                    <p>Émis quand une transformation est terminée avec succès</p>
+                    <pre><code>{
+  "event": "transformation.completed",
+  "timestamp": "2024-01-15T10:42:00.000Z",
+  "userId": "user123",
+  "data": {
+    "transformationId": "trans-xyz789",
+    "photoId": "photo-abc123",
+    "styleId": "vintage",
+    "resultUrl": "https://api.example.com/uploads/transformations/result.jpg"
+  }
+}</code></pre>
+                </div>
+
+                <div class="event-card">
+                    <h4><span class="badge badge-danger">transformation.failed</span></h4>
+                    <p>Émis quand une transformation échoue</p>
+                    <pre><code>{
+  "event": "transformation.failed",
+  "timestamp": "2024-01-15T10:42:00.000Z",
+  "userId": "user123",
+  "data": {
+    "transformationId": "trans-xyz789",
+    "error": "AI service unavailable"
+  }
+}</code></pre>
+                </div>
+
+                <div class="event-card">
+                    <h4><span class="badge badge-warning">photo.deleted</span></h4>
+                    <p>Émis quand une photo est supprimée</p>
+                    <pre><code>{
+  "event": "photo.deleted",
+  "timestamp": "2024-01-15T10:35:00.000Z",
+  "userId": "user123",
+  "data": {
+    "photoId": "photo-abc123"
+  }
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- Test en direct -->
+            <section id="test" class="section">
+                <h2>Test en direct</h2>
+
+                <div class="test-panel">
+                    <h3>⚡ Testez la connexion SSE</h3>
+                    <p>Cliquez sur le bouton ci-dessous pour vous connecter au flux d'événements en temps réel.</p>
+
+                    <div style="margin: 1rem 0;">
+                        <button id="connect-btn" onclick="connectSSE()">Se connecter</button>
+                        <button id="disconnect-btn" onclick="disconnectSSE()" disabled>Se déconnecter</button>
+                    </div>
+
+                    <div id="connection-status" class="status disconnected">
+                        <span class="dot red"></span>
+                        Déconnecté
+                    </div>
+
+                    <h4 style="margin-top: 1.5rem;">Événements reçus :</h4>
+                    <div id="events-log">
+                        <p style="color: #6c757d;">En attente de connexion...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Intégration -->
+            <section id="integration" class="section">
+                <h2>Intégration</h2>
+
+                <h3>JavaScript (Navigateur)</h3>
+                <pre><code>// Connexion au flux SSE
+const eventSource = new EventSource('/api/v1/events/stream');
+
+// Écouter tous les événements
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Événement reçu:', data);
+};
+
+// Écouter un événement spécifique
+eventSource.addEventListener('transformation.completed', (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Transformation terminée!', data);
+
+  // Afficher une notification
+  showNotification({
+    title: 'Transformation terminée!',
+    message: 'Votre image est prête',
+    image: data.data.resultUrl
+  });
+});
+
+// Gestion des erreurs
+eventSource.onerror = (error) => {
+  console.error('Erreur SSE:', error);
+};
+
+// Fermer la connexion
+eventSource.close();</code></pre>
+
+                <h3>React (Hook personnalisé)</h3>
+                <pre><code>import { useEffect, useState } from 'react';
+
+function useRealtimeEvents() {
+  const [events, setEvents] = useState([]);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const es = new EventSource('/api/v1/events/stream');
+
+    es.onopen = () => setIsConnected(true);
+
+    es.addEventListener('transformation.completed', (event) => {
+      const data = JSON.parse(event.data);
+      setEvents(prev => [data, ...prev]);
+    });
+
+    es.onerror = () => setIsConnected(false);
+
+    return () => es.close();
+  }, []);
+
+  return { events, isConnected };
+}
+
+// Utilisation
+function App() {
+  const { events, isConnected } = useRealtimeEvents();
+
+  return (
+    &lt;div&gt;
+      &lt;div&gt;{isConnected ? '🟢 Connecté' : '🔴 Déconnecté'}&lt;/div&gt;
+      {events.map(event => (
+        &lt;div key={event.timestamp}&gt;{event.event}&lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+                <h3>React Native</h3>
+                <pre><code>// Installation: npm install react-native-sse
+import EventSource from 'react-native-sse';
+
+const es = new EventSource('/api/v1/events/stream', {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+
+es.addEventListener('transformation.completed', (event) => {
+  const data = JSON.parse(event.data);
+
+  // Notification push
+  PushNotification.localNotification({
+    title: 'Transformation terminée!',
+    message: 'Votre image est prête',
+    picture: data.data.resultUrl
+  });
+});</code></pre>
+            </section>
+
+            <!-- Exemples -->
+            <section id="examples" class="section">
+                <h2>Exemples d'utilisation</h2>
+
+                <h3>Filtrer les événements par utilisateur</h3>
+                <pre><code>eventSource.addEventListener('transformation.completed', (event) => {
+  const data = JSON.parse(event.data);
+
+  // Ne traiter que les événements de l'utilisateur connecté
+  if (data.userId === currentUserId) {
+    handleTransformationCompleted(data);
+  }
+});</code></pre>
+
+                <h3>Reconnexion automatique</h3>
+                <pre><code>let reconnectDelay = 1000;
+const maxDelay = 30000;
+
+function connect() {
+  const es = new EventSource('/api/v1/events/stream');
+
+  es.onopen = () => {
+    console.log('✅ Connecté');
+    reconnectDelay = 1000; // Reset
+  };
+
+  es.onerror = () => {
+    es.close();
+
+    // Reconnexion avec exponential backoff
+    setTimeout(() => {
+      connect();
+      reconnectDelay = Math.min(reconnectDelay * 2, maxDelay);
+    }, reconnectDelay);
+  };
+}</code></pre>
+
+                <h3>Test avec curl</h3>
+                <pre><code>curl -N -H "Accept: text/event-stream" \
+  http://localhost:3000/api/v1/events/stream</code></pre>
+            </section>
+
+            <!-- Ressources -->
+            <section class="section">
+                <h2>Ressources</h2>
+                <ul style="line-height: 2;">
+                    <li><a href="/api/v1/docs" target="_blank">📚 Documentation API Swagger</a></li>
+                    <li><a href="/dashboard" target="_blank">📊 Dashboard temps réel</a></li>
+                    <li><a href="/api/v1/events/stats" target="_blank">📈 Statistiques des événements</a></li>
+                    <li><a href="https://github.com/TheGoatIA/devfest-studio-api/blob/main/WEBSOCKET.md" target="_blank">📄 Documentation complète (GitHub)</a></li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>DevFest Studio API - Documentation WebSocket/SSE</p>
+            <p><a href="https://github.com/TheGoatIA/devfest-studio-api">GitHub</a> | <a href="/api/v1/docs">API Docs</a></p>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let eventCount = 0;
+
+        function connectSSE() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            const logDiv = document.getElementById('events-log');
+            const statusDiv = document.getElementById('connection-status');
+            const connectBtn = document.getElementById('connect-btn');
+            const disconnectBtn = document.getElementById('disconnect-btn');
+
+            logDiv.innerHTML = '<p style="color: #6c757d;">Connexion en cours...</p>';
+
+            eventSource = new EventSource('/api/v1/events/stream');
+
+            eventSource.onopen = () => {
+                statusDiv.className = 'status connected';
+                statusDiv.innerHTML = '<span class="dot green"></span> Connecté';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+
+                logDiv.innerHTML = '<p style="color: #28a745;">✅ Connexion établie. En attente d\'événements...</p>';
+            };
+
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    addEventToLog(data);
+                } catch (e) {
+                    console.error('Erreur parsing:', e);
+                }
+            };
+
+            // Écouter tous les types d'événements
+            ['transformation.completed', 'transformation.started', 'transformation.failed', 'photo.uploaded', 'photo.deleted'].forEach(eventType => {
+                eventSource.addEventListener(eventType, (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        addEventToLog(data);
+                    } catch (e) {
+                        console.error('Erreur parsing:', e);
+                    }
+                });
+            });
+
+            eventSource.onerror = (error) => {
+                console.error('Erreur SSE:', error);
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = '<span class="dot red"></span> Erreur de connexion';
+            };
+        }
+
+        function disconnectSSE() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+
+            const statusDiv = document.getElementById('connection-status');
+            const connectBtn = document.getElementById('connect-btn');
+            const disconnectBtn = document.getElementById('disconnect-btn');
+            const logDiv = document.getElementById('events-log');
+
+            statusDiv.className = 'status disconnected';
+            statusDiv.innerHTML = '<span class="dot red"></span> Déconnecté';
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+
+            logDiv.innerHTML += '<p style="color: #dc3545; margin-top: 1rem;">❌ Déconnecté</p>';
+        }
+
+        function addEventToLog(data) {
+            const logDiv = document.getElementById('events-log');
+            eventCount++;
+
+            const entry = document.createElement('div');
+            entry.className = 'event-log-entry';
+            entry.innerHTML = `
+                <strong>#${eventCount} - ${data.event}</strong><br>
+                <small>${new Date(data.timestamp).toLocaleString()}</small><br>
+                <code>${JSON.stringify(data.data, null, 2)}</code>
+            `;
+
+            if (logDiv.querySelector('p')) {
+                logDiv.innerHTML = '';
+            }
+
+            logDiv.insertBefore(entry, logDiv.firstChild);
+
+            // Limiter à 10 événements affichés
+            while (logDiv.children.length > 10) {
+                logDiv.removeChild(logDiv.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>
