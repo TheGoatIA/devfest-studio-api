@@ -188,12 +188,18 @@ async function startServer(): Promise<void> {
         documentation: '/api/v1/docs',
         health: '/api/v1/health',
         dashboard: '/dashboard',
+        websocketDocs: '/websocket-docs',
       });
     });
 
     // Route pour le dashboard en temps réel
     app.get('/dashboard', (_req, res) => {
       res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
+    });
+
+    // Route pour la documentation WebSocket/SSE
+    app.get('/websocket-docs', (_req, res) => {
+      res.sendFile(path.join(process.cwd(), 'public', 'websocket-docs.html'));
     });
 
     // ========== GESTION DES ERREURS ==========
