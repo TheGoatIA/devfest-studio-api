@@ -12,6 +12,7 @@ import { webhookService } from '../../services/WebhookService';
 import logger from '../../../config/logger';
 import { AppError } from '../../../shared/errors/AppError';
 import { NotFoundError } from '../../../shared/errors/NotFoundError';
+import axios from 'axios';
 
 export interface StartTransformationInput {
   userId: string;
@@ -204,10 +205,10 @@ export class StartTransformationUseCase {
       });
 
       // Simuler le téléchargement (en vrai, vous utiliseriez axios ou fetch)
-      // const imageBuffer = await this.downloadImage(photo.storage.originalUrl);
+       const imageBuffer = await this.downloadImage(photo.storage.originalUrl);
 
       // Pour la démo, créer un buffer fictif
-      const imageBuffer = Buffer.from('fake-image-data');
+      //const imageBuffer = Buffer.from('fake-image-data');
 
       // Progression: Analyse
       await this.transformationRepository.updateStatus(transformationId, 'processing', 0.3);
@@ -277,6 +278,26 @@ export class StartTransformationUseCase {
 
       // Émettre l'événement d'échec
       await webhookService.transformationFailed(transformationId, userId, error.message);
+    }
+  }
+
+  private async downloadImage(url: string): Promise<Buffer> {
+    try {
+      logger.info(`📥 Téléchargement de l'image depuis : ${url}`);
+
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer', // Très important : demande les données binaires
+      });
+
+      // Convertit la réponse en Buffer Node.js
+      return Buffer.from(response.data);
+
+    } catch (error: any) {
+      logger.error("❌ Échec du téléchargement de l'image", {
+        url,
+        error: error.message
+      });
+      throw new AppError(`Impossible de télécharger l'image originale: ${error.message}`, 500);
     }
   }
 }
