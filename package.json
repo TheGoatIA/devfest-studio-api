@@ -46,7 +46,7 @@
     "mime-types": "^3.0.1",
     "mongoose": "^8.19.4",
     "multer": "^2.0.2",
-    "redis": "^5.9.0",
+    "redis": "^5.10.0",
     "sharp": "^0.34.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
