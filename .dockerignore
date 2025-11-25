@@ -14,7 +14,7 @@ README.md
 .idea
 coverage
 .nyc_output
-scripts
+
 tests
 *.test.ts
 *.spec.ts
