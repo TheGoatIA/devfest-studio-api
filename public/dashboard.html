@@ -532,8 +532,18 @@
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 Initialisation du dashboard...');
-            initSSE();
+            
+            // SSE désactivé temporairement au profit du polling (demande utilisateur)
+            // initSSE();
+            
+            // Chargement initial
             loadInitialTransformations();
+
+            // Polling toutes les 5 secondes (Fallback robuste)
+            console.log('🔄 Polling activé (5s)');
+            setInterval(() => {
+                loadInitialTransformations();
+            }, 5000);
         });
 
         // Nettoyage lors de la fermeture de la page
