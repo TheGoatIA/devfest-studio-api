@@ -44,7 +44,7 @@ export class StartTransformationUseCase {
     private styleRepository: IStyleRepository,
     private storageService: IStorageService,
     private aiService: AIService
-  ) {}
+  ) { }
 
   async execute(input: StartTransformationInput): Promise<StartTransformationOutput> {
     try {
@@ -150,7 +150,14 @@ export class StartTransformationUseCase {
 
       // 6. Démarrer le traitement asynchrone
       // En production, ceci serait géré par une queue (Bull, BullMQ, etc.)
-      this.processTransformationAsync(transformationId, photo, style || customStyle!, input.userId);
+      this.processTransformationAsync(transformationId, photo, style || customStyle!, input.userId)
+        .catch(err => {
+          logger.error('❌ Erreur fatale non gérée dans le traitement asynchrone', {
+            error: err instanceof Error ? err.message : 'Unknown error',
+            stack: err instanceof Error ? err.stack : undefined,
+            transformationId
+          });
+        });
 
       // 7. Calculer le temps estimé
       const estimatedTime = style ? style.technical.estimatedProcessingTime : customStyle ? 60 : 30;
@@ -205,7 +212,7 @@ export class StartTransformationUseCase {
       });
 
       // Simuler le téléchargement (en vrai, vous utiliseriez axios ou fetch)
-       const imageBuffer = await this.downloadImage(photo.storage.originalUrl);
+      const imageBuffer = await this.downloadImage(photo.storage.originalUrl);
 
       // Pour la démo, créer un buffer fictif
       //const imageBuffer = Buffer.from('fake-image-data');
