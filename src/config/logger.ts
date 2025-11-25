@@ -136,13 +136,17 @@ const logger = winston.createLogger({
  * En mode développement, ajouter aussi les logs dans la console
  * avec des couleurs pour faciliter la lecture
  */
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
-    new winston.transports.Console({
-      format: consoleFormat,
-    })
-  );
-}
+// Toujours ajouter les logs dans la console (stdout) pour Docker
+logger.add(
+  new winston.transports.Console({
+    // En production, utiliser le format JSON pour faciliter le parsing par les outils de monitoring
+    // En développement, utiliser le format coloré pour la lisibilité
+    format:
+      process.env.NODE_ENV === 'production'
+        ? winston.format.combine(winston.format.timestamp(), winston.format.json())
+        : consoleFormat,
+  })
+);
 
 /**
  * Fonction helper pour logger les requêtes HTTP

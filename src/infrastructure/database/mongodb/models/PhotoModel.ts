@@ -129,7 +129,6 @@ const PhotoSchema = new Schema<IPhotoDocument>(
     },
     expiresAt: {
       type: Date,
-      index: true,
     },
   },
   {
