@@ -26,8 +26,8 @@ FROM node:25-alpine AS production
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install dumb-init and su-exec
+RUN apk add --no-cache dumb-init su-exec
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
@@ -39,11 +39,12 @@ COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/package.json ./
 COPY --from=builder --chown=nodejs:nodejs /app/public ./public
 
+# Copy entrypoint script
+COPY scripts/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Create uploads directory with correct permissions
 RUN mkdir -p /app/uploads && chown -R nodejs:nodejs /app/uploads
-
-# Switch to non-root user
-USER nodejs
 
 # Expose port
 EXPOSE 8080
@@ -57,5 +58,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:8080/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start application
-ENTRYPOINT ["dumb-init", "--"]
+ENTRYPOINT ["dumb-init", "--", "docker-entrypoint.sh"]
 CMD ["node", "dist/index.js"]
