@@ -191,7 +191,8 @@ export function setupGlobalErrorHandlers(): void {
 
     // En production, on pourrait vouloir arrêter le processus
     if (config.NODE_ENV === 'production') {
-      process.exit(1);
+      logger.warn('⚠️  Process exit prevented for stability');
+      // process.exit(1);
     }
   });
 
@@ -203,7 +204,8 @@ export function setupGlobalErrorHandlers(): void {
     });
 
     // Arrêter le processus car l'état de l'application est incertain
-    process.exit(1);
+    logger.warn('⚠️  Process exit prevented for stability');
+    // process.exit(1);
   });
 }
 

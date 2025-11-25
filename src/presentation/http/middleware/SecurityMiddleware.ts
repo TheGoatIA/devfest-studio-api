@@ -170,7 +170,7 @@ export function additionalSecurityHeaders(_req: any, res: any, next: any): void 
  * Middleware pour valider les origines des uploads
  * Empêche les uploads depuis des origines non autorisées
  */
-export function validateUploadOrigin(req: any, res: any, next: any): void {
+export function validateUploadOrigin(req: any, _res: any, next: any): void {
   const origin = req.get('origin');
   const referer = req.get('referer');
 
@@ -182,6 +182,10 @@ export function validateUploadOrigin(req: any, res: any, next: any): void {
   // Vérifier que la requête vient d'une origine autorisée
   // Si ni origin ni referer, bloquer (probable tentative de script direct)
   if (!origin && !referer) {
+    // FIX: Allow mobile apps which might not send these headers
+    return next();
+
+    /*
     logger.warn("⚠️  Tentative d'upload sans origin/referer", {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
@@ -194,6 +198,7 @@ export function validateUploadOrigin(req: any, res: any, next: any): void {
         message: 'Origine non autorisée',
       },
     });
+    */
   }
 
   next();
