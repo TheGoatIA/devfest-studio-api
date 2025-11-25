@@ -8,6 +8,27 @@
 import logger from '../logger';
 import mongoDBConnection from './mongodb';
 import redisConnection from './redis';
+import { StyleModel } from '../../infrastructure/database/mongodb/models/StyleModel';
+import { styles } from '../../infrastructure/database/seeds/styleData';
+
+/**
+ * Seed automatique de la base de données si elle est vide
+ */
+async function seedDatabase() {
+  try {
+    const count = await StyleModel.countDocuments();
+    if (count === 0) {
+      logger.info('🌱 Base de données vide, insertion des styles par défaut...');
+      await StyleModel.insertMany(styles);
+      logger.info(`✅ Seed automatique terminé : ${styles.length} styles insérés`);
+    } else {
+      logger.debug(`ℹ️  Base de données déjà initialisée (${count} styles)`);
+    }
+  } catch (error) {
+    logger.error('❌ Erreur lors du seed automatique', { error });
+    // On ne bloque pas le démarrage pour ça
+  }
+}
 
 /**
  * Initialiser toutes les connexions aux bases de données
@@ -21,6 +42,9 @@ export async function initializeDatabases(): Promise<void> {
     // Connexion à MongoDB (obligatoire)
     await mongoDBConnection.connect();
     logger.info('✅ MongoDB connecté');
+
+    // Seed automatique si nécessaire
+    await seedDatabase();
 
     // Connexion à Redis (optionnel - ne bloque pas l'application)
     try {

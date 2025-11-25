@@ -69,8 +69,14 @@ export interface EnvironmentConfig {
 function getRequiredEnv(key: string): string {
   const value = process.env[key];
   if (!value) {
+    // Log available keys to help debugging (without values for security)
+    const availableKeys = Object.keys(process.env).join(', ');
+    logger.error(`❌ Variable d'environnement manquante: ${key}`);
+    logger.debug(`Variables disponibles: ${availableKeys}`);
+    
     throw new Error(
-      `❌ Variable d'environnement manquante: ${key}\n` + `Veuillez vérifier votre fichier .env`
+      `❌ Variable d'environnement manquante: ${key}\n` + 
+      `Veuillez vérifier votre fichier .env ou la configuration Docker.`
     );
   }
   return value;

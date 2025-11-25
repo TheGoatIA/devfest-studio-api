@@ -41,7 +41,7 @@ const swaggerDefinition = {
       description: 'Development server',
     },
     {
-      url: 'https://devfest-studio-api.com/api/v1',
+      url: 'https://devfest-studio.borisgauty.com/api/v1',
       description: 'Production server',
     },
   ],
@@ -413,12 +413,18 @@ const swaggerDefinition = {
   ],
 };
 
+const fileExtension = config.NODE_ENV === 'production' ? 'js' : 'ts';
+
 const options: swaggerJsdoc.Options = {
   swaggerDefinition,
   apis: [
-    './src/docs/swagger-routes.ts',
-    './src/presentation/http/routes/*.ts',
-    './src/presentation/http/controllers/*.ts',
+    `./src/docs/swagger-routes.${fileExtension}`,
+    `./src/presentation/http/routes/*.${fileExtension}`,
+    `./src/presentation/http/controllers/*.${fileExtension}`,
+    // Support pour le build (dist)
+    `./dist/docs/swagger-routes.js`,
+    `./dist/presentation/http/routes/*.js`,
+    `./dist/presentation/http/controllers/*.js`,
   ],
 };
 
