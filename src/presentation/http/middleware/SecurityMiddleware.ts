@@ -29,6 +29,7 @@ const corsOptions: cors.CorsOptions = {
       'https://devfest-studio.com',
       'https://www.devfest-studio.com',
       'https://app.devfest-studio.com',
+      'https://devfest-studio.borisgauty.com'
       // Ajouter d'autres domaines selon vos besoins
     ];
 
