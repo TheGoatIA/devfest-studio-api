@@ -29,21 +29,16 @@ const corsOptions: cors.CorsOptions = {
       'https://devfest-studio.com',
       'https://www.devfest-studio.com',
       'https://app.devfest-studio.com',
+      'https://devfest-studio.borisgauty.com'
       // Ajouter d'autres domaines selon vos besoins
     ];
 
-    // FIX: Allow all origins for demo purposes
-    callback(null, true);
-    return;
-
-    /*
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       logger.warn('⚠️  Origine CORS non autorisée', { origin });
       callback(new Error('Non autorisé par CORS'));
     }
-    */
   },
 
   // Méthodes HTTP autorisées
