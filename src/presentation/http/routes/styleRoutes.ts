@@ -13,6 +13,14 @@ const router = Router();
 const styleController = new StyleController();
 
 /**
+ * POST /api/v1/styles
+ * Créer un nouveau style
+ *
+ * PUBLIC - Pas d'authentification requise
+ */
+router.post('/styles', validate(styleSchemas.createStyle, 'body'), styleController.createStyle);
+
+/**
  * GET /api/v1/styles
  * Lister les styles disponibles
  *
@@ -66,6 +74,31 @@ router.get(
   '/styles/:styleId',
   validate(styleSchemas.styleIdParam, 'params'),
   styleController.getStyleById
+);
+
+/**
+ * PUT /api/v1/styles/:styleId
+ * Mettre à jour un style
+ *
+ * PUBLIC - Pas d'authentification requise
+ */
+router.put(
+  '/styles/:styleId',
+  validate(styleSchemas.styleIdParam, 'params'),
+  validate(styleSchemas.updateStyle, 'body'),
+  styleController.updateStyle
+);
+
+/**
+ * DELETE /api/v1/styles/:styleId
+ * Supprimer un style
+ *
+ * PUBLIC - Pas d'authentification requise
+ */
+router.delete(
+  '/styles/:styleId',
+  validate(styleSchemas.styleIdParam, 'params'),
+  styleController.deleteStyle
 );
 
 export default router;

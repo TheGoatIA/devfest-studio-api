@@ -73,9 +73,9 @@ function getRequiredEnv(key: string): string {
     const availableKeys = Object.keys(process.env).join(', ');
     logger.error(`❌ Variable d'environnement manquante: ${key}`);
     logger.debug(`Variables disponibles: ${availableKeys}`);
-    
+
     throw new Error(
-      `❌ Variable d'environnement manquante: ${key}\n` + 
+      `❌ Variable d'environnement manquante: ${key}\n` +
       `Veuillez vérifier votre fichier .env ou la configuration Docker.`
     );
   }
@@ -145,7 +145,7 @@ export function validateEnvironment(): EnvironmentConfig {
 
       // Gemini AI
       GEMINI_API_KEY: getRequiredEnv('GEMINI_API_KEY'),
-      GEMINI_MODEL: process.env.GEMINI_MODEL || 'gemini-pro-vision',
+      GEMINI_MODEL: process.env.GEMINI_MODEL || 'gemini-2.5-flash-image',
       GEMINI_BASE_URL: process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com',
 
       // Rate Limiting

@@ -422,7 +422,7 @@ GOOGLE_CLOUD_KEY_FILE=/path/to/key.json (optional)
 
 # AI
 GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-pro-vision
+GEMINI_MODEL=gemini-2.5-flash-image
 GEMINI_BASE_URL=https://generativelanguage.googleapis.com
 
 # Rate Limiting

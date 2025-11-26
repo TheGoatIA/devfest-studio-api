@@ -73,7 +73,7 @@ export class GeminiClient {
    */
   async generate(input: GeminiGenerateInput): Promise<GeminiResponse> {
     try {
-      const modelName = input.model || 'gemini-pro';
+      const modelName = input.model || 'gemini-2.5-flash-image';
 
       logger.debug('🤖 Appel Gemini API (text generation)', {
         model: modelName,
@@ -173,7 +173,7 @@ Provide a comprehensive analysis in JSON format with the following structure:
     return this.generate({
       prompt,
       imageBuffer,
-      model: 'gemini-pro-vision',
+      model: 'gemini-2.5-flash-image',
       parameters: {
         temperature: 0.5,
         topP: 0.9,
@@ -218,7 +218,7 @@ Critères de validation :
 
     const response = await this.generate({
       prompt,
-      model: 'gemini-pro',
+      model: 'gemini-2.5-flash-image',
       parameters: {
         temperature: 0.3,
         topP: 0.8,
@@ -355,7 +355,7 @@ Critères de validation :
     try {
       const response = await this.generate({
         prompt: 'Ping - respond with "pong"',
-        model: 'gemini-pro',
+        model: 'gemini-2.5-flash-image',
         parameters: {
           temperature: 0,
           maxOutputTokens: 10,
