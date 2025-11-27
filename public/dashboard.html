@@ -350,6 +350,169 @@
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
+            object-fit: cover;
+        }
+
+        .badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .badge.new {
+            background: rgba(16, 185, 129, 0.9);
+            animation: bounceIn 0.5s;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .timestamp {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .no-results svg {
+            width: 80px;
+            height: 80px;
+            opacity: 0.6;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow: auto;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90vh;
+            margin-top: 2vh;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            height: 150px;
+        }
+
+        /* Maintenance Button */
+        .maintenance-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
             font-size: 14px;
             transition: background-color 0.3s;
             margin-left: 10px;
@@ -381,7 +544,7 @@
                 <div class="status-dot" id="statusDot"></div>
                 <span id="statusText">Connecté</span>
             </div>
-            <button id="maintenanceBtn" class="maintenance-btn" onclick="toggleMaintenance()">
+            <button id="maintenanceBtn" class="maintenance-btn">
                 ⏸️ Suspendre
             </button>
         </div>
@@ -407,8 +570,8 @@
                 <option value="product">Product Shot</option>
             </select>
             <input type="text" id="searchInput" placeholder="Rechercher..." />
-            <button onclick="applyFilters()">Filtrer</button>
-            <button onclick="clearFilters()">Réinitialiser</button>
+            <button id="applyFiltersBtn">Filtrer</button>
+            <button id="clearFiltersBtn">Réinitialiser</button>
         </div>
 
         <div id="loading" class="loading">
@@ -432,167 +595,327 @@
 
     <!-- Image Modal -->
     <div id="imageModal" class="modal">
-        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <span id="closeModalBtn" class="modal-close">&times;</span>
         <img class="modal-content" id="modalImage">
         <div id="modalCaption" class="modal-caption"></div>
-        // Remplacer l'adresse interne par l'adresse publique
-        return url.replace('http://0.0.0.0:8080', 'https://devfest-studio.borisgauty.com');
+    </div>
+
+    <script>
+        let transformations = [];
+        let eventSource = null;
+        let isConnected = false;
+
+        // Initialiser la connexion SSE
+        function initSSE() {
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            eventSource = new EventSource('/api/v1/events/stream');
+
+            eventSource.onopen = () => {
+                console.log('✅ Connexion SSE établie');
+                isConnected = true;
+                updateConnectionStatus(true);
+            };
+
+            eventSource.onmessage = (event) => {
+                console.log('📨 Message reçu:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    handleEvent(data);
+                } catch (error) {
+                    console.error('Erreur parsing message:', error);
+                }
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('❌ Erreur SSE:', error);
+                isConnected = false;
+                updateConnectionStatus(false);
+
+                // Reconnexion automatique après 5 secondes
+                setTimeout(() => {
+                    console.log('🔄 Tentative de reconnexion...');
+                    initSSE();
+                }, 5000);
+            };
+
+            // Écouter les événements spécifiques
+            eventSource.addEventListener('transformation.completed', (event) => {
+                console.log('✨ Transformation complétée:', event.data);
+                const data = JSON.parse(event.data);
+                addTransformation(data.data);
+            });
+        }
+
+        // Gérer les événements
+        function handleEvent(data) {
+            if (data.event === 'transformation.completed') {
+                addTransformation(data.data);
+            }
+        }
+
+        // Ajouter une transformation
+        function addTransformation(transformation) {
+            // Ajouter au début du tableau
+            transformations.unshift({
+                ...transformation,
+                isNew: true,
+                timestamp: new Date().toISOString()
+            });
+
+            // Retirer le flag "new" après 5 secondes
+            setTimeout(() => {
+                const index = transformations.findIndex(t => t.transformationId === transformation.transformationId);
+                if (index !== -1) {
+                    transformations[index].isNew = false;
+                    renderGallery();
+                }
+            }, 5000);
+
+            updateStats();
+            renderGallery();
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            document.getElementById('totalCount').textContent = transformations.length;
+
+            const now = Date.now();
+            const oneDayAgo = now - (24 * 60 * 60 * 1000);
+            const newCount = transformations.filter(t => new Date(t.timestamp).getTime() > oneDayAgo).length;
+            document.getElementById('newCount').textContent = newCount;
+        }
+
+        // Mettre à jour le statut de connexion
+        function updateConnectionStatus(connected) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+
+            if (connected) {
+                statusDot.classList.remove('disconnected');
+                statusText.textContent = 'Connecté';
+            } else {
+                statusDot.classList.add('disconnected');
+                statusText.textContent = 'Déconnecté';
+            }
+        }
+
+        // Rendre la galerie
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            const loading = document.getElementById('loading');
+            const noResults = document.getElementById('noResults');
+
+            loading.style.display = 'none';
+
+            if (transformations.length === 0) {
+                gallery.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            gallery.style.display = 'grid';
+            noResults.style.display = 'none';
+
+            gallery.innerHTML = transformations.map(t => `
+                <div class="image-card" data-image-url="${fixImageUrl(t.resultUrl || t.url)}" data-caption="${t.styleId || 'Transformation'}">
+                    <div class="image-container">
+                        <img src="${fixImageUrl(t.resultUrl || t.url)}"
+                             alt="${t.styleId || 'Transformation'}"
+                             onerror="this.src='/uploads/transformations/results/placeholder.jpg'">
+                        ${t.isNew ? '<span class="badge new">🎉 NEW</span>' : ''}
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">
+                            Transformation ${t.transformationId ? t.transformationId.substring(0, 8) : 'N/A'}
+                        </div>
+                        <div class="card-meta">
+                            <span class="timestamp">
+                                🕐 ${formatTimestamp(t.timestamp)}
+                            </span>
+                            <span>✨ ${t.styleId || 'Custom'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Corriger les URLs d'images (0.0.0.0 -> domaine public)
+        function fixImageUrl(url) {
+            if (!url) return '/uploads/transformations/results/placeholder.jpg';
+            // Remplacer l'adresse interne par l'adresse publique
+            return url.replace('http://0.0.0.0:8080', 'https://devfest-studio.borisgauty.com');
         }
 
         // Formater le timestamp
         function formatTimestamp(timestamp) {
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diff = now.getTime() - date.getTime();
-        const seconds = Math.floor(diff / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now.getTime() - date.getTime();
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(minutes / (60 * 24));
 
-        if (days > 0) return `Il y a ${days}j`;
-        if (hours > 0) return `Il y a ${hours}h`;
-        if (minutes > 0) return `Il y a ${minutes}min`;
-        return 'À l\'instant';
+            if (days > 0) return `Il y a ${days}j`;
+            if (hours > 0) return `Il y a ${hours}h`;
+            if (minutes > 0) return `Il y a ${minutes}min`;
+            return 'À l\'instant';
         }
 
         // Charger les transformations initiales
         async function loadInitialTransformations() {
-        try {
-        const response = await fetch('/api/v1/transformations/recent');
-        if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-        transformations = data.data.map(t => ({
-        ...t,
-        isNew: false
-        }));
-        updateStats();
-        renderGallery();
-        }
-        }
-        } catch (error) {
-        console.error('Erreur chargement transformations:', error);
-        renderGallery();
-        }
+            try {
+                const response = await fetch('/api/v1/transformations/recent');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        transformations = data.data.map(t => ({
+                            ...t,
+                            isNew: false
+                        }));
+                        updateStats();
+                        renderGallery();
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur chargement transformations:', error);
+                renderGallery();
+            }
         }
 
         // Appliquer les filtres
         function applyFilters() {
-        // TODO: Implémenter les filtres
-        console.log('Filtres appliqués');
+            // TODO: Implémenter les filtres
+            console.log('Filtres appliqués');
         }
 
         // Réinitialiser les filtres
         function clearFilters() {
-        document.getElementById('filterStatus').value = '';
-        document.getElementById('filterStyle').value = '';
-        document.getElementById('searchInput').value = '';
-        applyFilters();
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterStyle').value = '';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
         }
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
-        console.log('🚀 Initialisation du dashboard...');
+            console.log('🚀 Initialisation du dashboard...');
 
-        // SSE désactivé temporairement au profit du polling (demande utilisateur)
-        // initSSE();
+            // Attacher les écouteurs d'événements
+            document.getElementById('maintenanceBtn').addEventListener('click', toggleMaintenance);
+            document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
+            document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 
-        // Chargement initial
-        loadInitialTransformations();
+            // Délégation d'événement pour la galerie (modale)
+            document.getElementById('gallery').addEventListener('click', function (e) {
+                const card = e.target.closest('.image-card');
+                if (card) {
+                    const imageUrl = card.getAttribute('data-image-url');
+                    const caption = card.getAttribute('data-caption');
+                    openModal(imageUrl, caption);
+                }
+            });
 
-        // Polling toutes les 5 secondes (Fallback robuste)
-        console.log('🔄 Polling activé (5s)');
-        setInterval(() => {
-        loadInitialTransformations();
-        }, 5000);
-        setInterval(() => {
-        loadInitialTransformations();
-        }, 5000);
+            // SSE désactivé temporairement au profit du polling (demande utilisateur)
+            // initSSE();
 
-        // Charger le statut du système
-        checkSystemStatus();
+            // Chargement initial
+            loadInitialTransformations();
+
+            // Polling toutes les 5 secondes (Fallback robuste)
+            console.log('🔄 Polling activé (5s)');
+            setInterval(() => {
+                loadInitialTransformations();
+            }, 5000);
+
+            // Charger le statut du système
+            checkSystemStatus();
         });
 
         // Gestion du mode maintenance
         let isMaintenance = false;
 
         async function checkSystemStatus() {
-        try {
-        const response = await fetch('/api/v1/system/status');
-        const data = await response.json();
-        if (data.success) {
-        updateMaintenanceButton(data.data.maintenance);
-        }
-        } catch (error) {
-        console.error('Erreur vérification statut:', error);
-        }
+            try {
+                const response = await fetch('/api/v1/system/status');
+                const data = await response.json();
+                if (data.success) {
+                    updateMaintenanceButton(data.data.maintenance);
+                }
+            } catch (error) {
+                console.error('Erreur vérification statut:', error);
+            }
         }
 
         async function toggleMaintenance() {
-        try {
-        const newState = !isMaintenance;
-        const response = await fetch('/api/v1/system/maintenance', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ enabled: newState })
-        });
+            try {
+                const newState = !isMaintenance;
+                const response = await fetch('/api/v1/system/maintenance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ enabled: newState })
+                });
 
-        const data = await response.json();
-        if (data.success) {
-        updateMaintenanceButton(newState);
-        }
-        } catch (error) {
-        console.error('Erreur changement maintenance:', error);
-        alert('Erreur lors du changement de mode');
-        }
+                const data = await response.json();
+                if (data.success) {
+                    updateMaintenanceButton(newState);
+                }
+            } catch (error) {
+                console.error('Erreur changement maintenance:', error);
+                alert('Erreur lors du changement de mode');
+            }
         }
 
         function updateMaintenanceButton(maintenance) {
-        isMaintenance = maintenance;
-        const btn = document.getElementById('maintenanceBtn');
-        if (maintenance) {
-        btn.textContent = '▶️ Reprendre';
-        btn.classList.add('active');
-        btn.style.backgroundColor = '#10b981';
-        } else {
-        btn.textContent = '⏸️ Suspendre';
-        btn.classList.remove('active');
-        btn.style.backgroundColor = '#ef4444';
-        }
+            isMaintenance = maintenance;
+            const btn = document.getElementById('maintenanceBtn');
+            if (maintenance) {
+                btn.textContent = '▶️ Reprendre';
+                btn.classList.add('active');
+                btn.style.backgroundColor = '#10b981';
+            } else {
+                btn.textContent = '⏸️ Suspendre';
+                btn.classList.remove('active');
+                btn.style.backgroundColor = '#ef4444';
+            }
         }
 
         // Gestion de la modale
         function openModal(imageUrl, caption) {
-        const modal = document.getElementById('imageModal');
-        const modalImg = document.getElementById('modalImage');
-        const captionText = document.getElementById('modalCaption');
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const captionText = document.getElementById('modalCaption');
 
-        modal.style.display = "block";
-        modalImg.src = imageUrl;
-        captionText.innerHTML = caption;
+            modal.style.display = "block";
+            modalImg.src = imageUrl;
+            captionText.innerHTML = caption;
         }
 
         function closeModal() {
-        document.getElementById('imageModal').style.display = "none";
+            document.getElementById('imageModal').style.display = "none";
         }
 
         // Fermer la modale en cliquant en dehors
-        window.onclick = function(event) {
-        const modal = document.getElementById('imageModal');
-        if (event.target == modal) {
-        modal.style.display = "none";
-        }
+        window.onclick = function (event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
         }
 
         // Nettoyage lors de la fermeture de la page
         window.addEventListener('beforeunload', () => {
-        if (eventSource) {
-        eventSource.close();
-        }
+            if (eventSource) {
+                eventSource.close();
+            }
         });
-        </script>
+    </script>
 </body>
 
 </html>
