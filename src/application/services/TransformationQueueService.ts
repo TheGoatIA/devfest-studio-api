@@ -1,7 +1,6 @@
 import { Queue } from 'bullmq';
 import logger from '../../config/logger';
 import { config } from '../../config/environment';
-import { redisConnection } from '../../config/database/redis';
 
 export interface TransformationJobData {
     transformationId: string;
