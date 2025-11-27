@@ -254,5 +254,29 @@ function parseSize(size: string): number {
   return parseFloat(value) * (units[unit] || 1);
 }
 
+import rateLimit from 'express-rate-limit';
+
+/**
+ * Middleware de limitation de débit (Rate Limiting)
+ * Protège l'API contre les attaques par force brute et le spam
+ */
+export const apiRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limite chaque IP à 100 requêtes par fenêtre
+  standardHeaders: true, // Retourne les headers `RateLimit-*`
+  legacyHeaders: false, // Désactive les headers `X-RateLimit-*`
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Trop de requêtes, veuillez réessayer plus tard.',
+    },
+  },
+  handler: (req, res, _next, options) => {
+    logger.warn(`⚠️ Rate limit dépassé pour l'IP ${req.ip}`);
+    res.status(options.statusCode).json(options.message);
+  },
+});
+
 // Export par défaut
 export default setupSecurityMiddleware;

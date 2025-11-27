@@ -13,9 +13,13 @@ import transformationRoutes from './transformationRoutes';
 import galleryRoutes from './galleryRoutes';
 import eventsRoutes from './eventsRoutes';
 import systemRoutes from './systemRoutes';
+import { apiRateLimiter } from '../middleware';
 
 // Créer le router principal
 const router = Router();
+
+// Appliquer le rate limiting globalement
+router.use(apiRateLimiter);
 
 /**
  * Monter les routes d'authentification

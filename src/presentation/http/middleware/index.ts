@@ -31,6 +31,7 @@ export {
   additionalSecurityHeaders,
   validateUploadOrigin,
   requestSizeLimit,
+  apiRateLimiter,
 } from './SecurityMiddleware';
 
 export { authenticate, optionalAuth, AuthenticatedRequest } from './AuthMiddleware';
