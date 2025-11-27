@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Configuration de Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -99,7 +99,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Configuration kubectl
         uses: azure/setup-kubectl@v4
@@ -131,7 +131,7 @@ jobs:
 
     steps:
       - name: Checkout du code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Confirmation du déploiement
         run: |

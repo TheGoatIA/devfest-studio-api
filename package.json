@@ -1,6 +1,6 @@
 {
   "name": "devfest-studio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "API REST complète pour l'application mobile DevFest Studio avec transformation d'images via IA Gemini",
   "main": "dist/index.js",
   "scripts": {
@@ -66,7 +66,7 @@
     "@types/supertest": "^6.0.3",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "^11.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
     "@typescript-eslint/parser": "^8.46.4",
     "eslint": "^9.39.1",
     "jest": "^30.2.0",
