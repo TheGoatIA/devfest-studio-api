@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { ITransformationRepository } from '../../../core/interfaces/repositories/ITransformationRepository';
 import { IPhotoRepository } from '../../../core/interfaces/repositories/IPhotoRepository';
 import { IStyleRepository } from '../../../core/interfaces/repositories/IStyleRepository';
-import { IStorageService } from '../../../core/interfaces/services/IStorageService';
 import { AIService } from '../../services/AIService';
 import { webhookService } from '../../services/WebhookService';
 import logger from '../../../config/logger';
@@ -44,7 +43,6 @@ export class StartTransformationUseCase {
     private transformationRepository: ITransformationRepository,
     private photoRepository: IPhotoRepository,
     private styleRepository: IStyleRepository,
-    private _storageService: IStorageService,
     private aiService: AIService
   ) { }
 
