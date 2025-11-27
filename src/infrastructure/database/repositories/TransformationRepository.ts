@@ -267,4 +267,42 @@ export class TransformationRepository implements ITransformationRepository {
       throw error;
     }
   }
+
+  /**
+   * Compter le nombre total de transformations
+   */
+  async countTotal(): Promise<number> {
+    try {
+      return await TransformationModel.countDocuments();
+    } catch (error: any) {
+      logger.error('❌ Erreur comptage total transformations', { error: error.message });
+      return 0;
+    }
+  }
+
+  /**
+   * Compter les transformations par statut
+   */
+  async countByStatus(): Promise<Record<string, number>> {
+    try {
+      const stats = await TransformationModel.aggregate([
+        {
+          $group: {
+            _id: '$processing.status',
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      const result: Record<string, number> = {};
+      stats.forEach((stat) => {
+        result[stat._id] = stat.count;
+      });
+
+      return result;
+    } catch (error: any) {
+      logger.error('❌ Erreur comptage transformations par statut', { error: error.message });
+      return {};
+    }
+  }
 }

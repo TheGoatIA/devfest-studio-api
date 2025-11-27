@@ -63,4 +63,9 @@ export interface IPhotoRepository {
    * Marquer une photo comme échouée
    */
   markAsFailed(photoId: string): Promise<IPhotoDocument | null>;
+
+  /**
+   * Compter le nombre total de photos
+   */
+  countTotal(): Promise<number>;
 }
