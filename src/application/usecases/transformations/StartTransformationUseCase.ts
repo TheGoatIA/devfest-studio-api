@@ -37,6 +37,8 @@ export interface StartTransformationOutput {
   createdAt: Date;
 }
 
+import { systemStateService } from '../../services/SystemStateService';
+
 export class StartTransformationUseCase {
   constructor(
     private transformationRepository: ITransformationRepository,
@@ -48,6 +50,11 @@ export class StartTransformationUseCase {
 
   async execute(input: StartTransformationInput): Promise<StartTransformationOutput> {
     try {
+      // 0. Vérifier le mode maintenance
+      if (systemStateService.isMaintenance()) {
+        throw new AppError('Le système est actuellement en maintenance. Veuillez réessayer plus tard.', 503);
+      }
+
       // 1. Valider que photo_id OU custom_description est fourni
       if (!input.styleId && !input.customDescription) {
         throw new AppError(

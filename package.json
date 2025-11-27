@@ -1,6 +1,6 @@
 {
   "name": "devfest-studio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "API REST complète pour l'application mobile DevFest Studio avec transformation d'images via IA Gemini",
   "main": "dist/index.js",
   "scripts": {

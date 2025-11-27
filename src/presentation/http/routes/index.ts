@@ -12,6 +12,7 @@ import styleRoutes from './styleRoutes';
 import transformationRoutes from './transformationRoutes';
 import galleryRoutes from './galleryRoutes';
 import eventsRoutes from './eventsRoutes';
+import systemRoutes from './systemRoutes';
 
 // Créer le router principal
 const router = Router();
@@ -21,6 +22,12 @@ const router = Router();
  * Toutes les routes auth seront préfixées par /api/v1/auth
  */
 router.use('/auth', authRoutes);
+
+/**
+ * Monter les routes système
+ * Routes pour le statut et la maintenance
+ */
+router.use('/system', systemRoutes);
 
 /**
  * Monter les routes des photos
