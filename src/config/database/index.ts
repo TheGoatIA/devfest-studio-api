@@ -17,9 +17,8 @@ import { styles } from '../../infrastructure/database/seeds/styleData';
 async function seedDatabase() {
   try {
     const count = await StyleModel.countDocuments();
-    if (count === 0 && count < styles.length) {
+    if (count === 0) {
       logger.info('🌱 Base de données vide, insertion des styles par défaut...');
-      await StyleModel.deleteMany();
       await StyleModel.insertMany(styles);
       logger.info(`✅ Seed automatique terminé : ${styles.length} styles insérés`);
     } else {
