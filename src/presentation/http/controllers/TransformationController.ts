@@ -6,7 +6,6 @@ import { Request, Response } from 'express';
 import { TransformationRepository } from '../../../infrastructure/database/repositories/TransformationRepository';
 import { PhotoRepository } from '../../../infrastructure/database/repositories/PhotoRepository';
 import { StyleRepository } from '../../../infrastructure/database/repositories/StyleRepository';
-import { LocalStorageService } from '../../../application/services/LocalStorageService';
 import { AIService } from '../../../application/services/AIService';
 import { StartTransformationUseCase } from '../../../application/usecases/transformations/StartTransformationUseCase';
 import { GetTransformationStatusUseCase } from '../../../application/usecases/transformations/GetTransformationStatusUseCase';
@@ -24,14 +23,12 @@ export class TransformationController {
     const transformationRepository = new TransformationRepository();
     const photoRepository = new PhotoRepository();
     const styleRepository = new StyleRepository();
-    const storageService = new LocalStorageService();
     const aiService = new AIService();
 
     this.startTransformationUseCase = new StartTransformationUseCase(
       transformationRepository,
       photoRepository,
       styleRepository,
-      storageService,
       aiService
     );
 
