@@ -49,6 +49,9 @@ export interface EnvironmentConfig {
   RATE_LIMIT_WINDOW_MS: number;
   RATE_LIMIT_MAX_REQUESTS: number;
 
+  // Queue
+  QUEUE_CONCURRENCY: number;
+
   // Configuration des uploads
   MAX_FILE_SIZE: number;
   ALLOWED_FILE_TYPES: string;
@@ -157,6 +160,9 @@ export function validateEnvironment(): EnvironmentConfig {
         process.env.RATE_LIMIT_MAX_REQUESTS || '100',
         'RATE_LIMIT_MAX_REQUESTS'
       ),
+
+      // Queue
+      QUEUE_CONCURRENCY: parseNumber(process.env.QUEUE_CONCURRENCY || '5', 'QUEUE_CONCURRENCY'),
 
       // Upload
       MAX_FILE_SIZE: parseNumber(process.env.MAX_FILE_SIZE || '10485760', 'MAX_FILE_SIZE'),

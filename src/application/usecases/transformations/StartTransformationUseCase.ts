@@ -12,7 +12,6 @@ import { webhookService } from '../../services/WebhookService';
 import logger from '../../../config/logger';
 import { AppError } from '../../../shared/errors/AppError';
 import { NotFoundError } from '../../../shared/errors/NotFoundError';
-import axios from 'axios';
 
 export interface StartTransformationInput {
   userId: string;
@@ -38,13 +37,14 @@ export interface StartTransformationOutput {
 }
 
 import { systemStateService } from '../../services/SystemStateService';
+import { transformationQueueService } from '../../services/TransformationQueueService';
 
 export class StartTransformationUseCase {
   constructor(
     private transformationRepository: ITransformationRepository,
     private photoRepository: IPhotoRepository,
     private styleRepository: IStyleRepository,
-    private storageService: IStorageService,
+    private _storageService: IStorageService,
     private aiService: AIService
   ) { }
 
@@ -155,22 +155,20 @@ export class StartTransformationUseCase {
         input.styleId || 'custom'
       );
 
-      // 6. Démarrer le traitement asynchrone
-      // En production, ceci serait géré par une queue (Bull, BullMQ, etc.)
-      this.processTransformationAsync(transformationId, photo, style || customStyle!, input.userId)
-        .catch(err => {
-          logger.error('❌ Erreur fatale non gérée dans le traitement asynchrone', {
-            error: err instanceof Error ? err.message : 'Unknown error',
-            stack: err instanceof Error ? err.stack : undefined,
-            transformationId
-          });
-        });
+      // 6. Ajouter le job à la file d'attente Redis
+      await transformationQueueService.addJob({
+        transformationId,
+        userId: input.userId,
+        photoId: input.photoId,
+        styleId: input.styleId,
+        customStyle,
+      });
 
       // 7. Calculer le temps estimé
       const estimatedTime = style ? style.technical.estimatedProcessingTime : customStyle ? 60 : 30;
       const estimatedCompletionTime = new Date(Date.now() + estimatedTime * 1000);
 
-      logger.info('🎨 Transformation démarrée', {
+      logger.info('🎨 Transformation démarrée (en file d\'attente)', {
         transformationId,
         userId: input.userId,
         photoId: input.photoId,
@@ -181,7 +179,7 @@ export class StartTransformationUseCase {
         transformationId: transformation.transformationId,
         status: transformation.processing.status,
         estimatedCompletionTime,
-        queuePosition: transformation.processing.queuePosition || 1,
+        queuePosition: await transformationQueueService.getQueueLength(),
         createdAt: transformation.createdAt,
       };
     } catch (error: any) {
@@ -195,123 +193,6 @@ export class StartTransformationUseCase {
       });
 
       throw new AppError(`Erreur lors du démarrage de la transformation: ${error.message}`, 500);
-    }
-  }
-
-  /**
-   * Traitement asynchrone de la transformation
-   * En production, ceci serait dans un worker séparé
-   */
-  private async processTransformationAsync(
-    transformationId: string,
-    photo: any,
-    style: any,
-    userId: string
-  ): Promise<void> {
-    try {
-      // Mettre à jour le statut
-      await this.transformationRepository.updateStatus(transformationId, 'processing', 0.1);
-
-      // Télécharger l'image depuis le storage
-      // Pour simplifier, on suppose que photo.storage.originalUrl est accessible
-      logger.info('📥 Téléchargement image pour transformation', {
-        transformationId,
-      });
-
-      // Simuler le téléchargement (en vrai, vous utiliseriez axios ou fetch)
-      const imageBuffer = await this.downloadImage(photo.storage.originalUrl);
-
-      // Pour la démo, créer un buffer fictif
-      //const imageBuffer = Buffer.from('fake-image-data');
-
-      // Progression: Analyse
-      await this.transformationRepository.updateStatus(transformationId, 'processing', 0.3);
-
-      // Appeler l'IA pour la transformation
-      logger.info('🤖 Transformation IA en cours', { transformationId });
-
-      const transformResult = await this.aiService.transformImage({
-        imageBuffer,
-        style,
-        quality: 'standard',
-      });
-
-      // Progression: Upload résultat
-      await this.transformationRepository.updateStatus(transformationId, 'processing', 0.7);
-
-      // Uploader l'image transformée
-      const uploadResult = await this.storageService.uploadFile(
-        transformResult.transformedImageBuffer,
-        {
-          originalName: `transformed_${transformationId}.jpg`,
-          mimeType: 'image/jpeg',
-          userId: photo.userId,
-          type: 'transformation',
-        }
-      );
-
-      // Marquer comme complété
-      await this.transformationRepository.markAsCompleted(transformationId, {
-        transformedImageUrl: uploadResult.publicUrl,
-        transformedImages: {
-          thumbnail: uploadResult.thumbnailUrl || '',
-          medium: uploadResult.publicUrl,
-          large: uploadResult.publicUrl,
-          original: uploadResult.publicUrl,
-        },
-        aiAnalysis: transformResult.analysis,
-        metadata: {
-          originalResolution: { width: 1920, height: 1080 },
-          outputResolution: { width: 1920, height: 1080 },
-          fileSize: uploadResult.size,
-          format: 'jpeg',
-        },
-      });
-
-      logger.info('✅ Transformation complétée', { transformationId });
-
-      // Émettre l'événement de complétion
-      await webhookService.transformationCompleted(
-        transformationId,
-        userId,
-        photo.photoId,
-        style.styleId || 'custom',
-        uploadResult.publicUrl
-      );
-    } catch (error: any) {
-      logger.error('❌ Erreur traitement transformation', {
-        error: error.message,
-        transformationId,
-      });
-
-      await this.transformationRepository.markAsFailed(transformationId, {
-        code: 'PROCESSING_FAILED',
-        message: error.message,
-        retryable: true,
-      });
-
-      // Émettre l'événement d'échec
-      await webhookService.transformationFailed(transformationId, userId, error.message);
-    }
-  }
-
-  private async downloadImage(url: string): Promise<Buffer> {
-    try {
-      logger.info(`📥 Téléchargement de l'image depuis : ${url}`);
-
-      const response = await axios.get(url, {
-        responseType: 'arraybuffer', // Très important : demande les données binaires
-      });
-
-      // Convertit la réponse en Buffer Node.js
-      return Buffer.from(response.data);
-
-    } catch (error: any) {
-      logger.error("❌ Échec du téléchargement de l'image", {
-        url,
-        error: error.message
-      });
-      throw new AppError(`Impossible de télécharger l'image originale: ${error.message}`, 500);
     }
   }
 }

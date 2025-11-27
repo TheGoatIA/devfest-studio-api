@@ -20,6 +20,7 @@ import {
   notFoundHandler,
   setupGlobalErrorHandlers,
 } from './presentation/http/middleware';
+import { TransformationWorker } from './infrastructure/workers/TransformationWorker';
 
 /**
  * Fonction principale pour démarrer l'application
@@ -213,6 +214,9 @@ async function startServer(): Promise<void> {
     // Configuration des handlers globaux d'erreurs
     setupGlobalErrorHandlers();
 
+    // 6. Démarrer le worker de transformation
+    const transformationWorker = new TransformationWorker();
+
     // Démarrer le serveur
     app.listen(config.PORT, config.HOST, () => {
       logger.info(`✅ Serveur démarré avec succès!`);
@@ -232,12 +236,14 @@ async function startServer(): Promise<void> {
     // Gestion propre de l'arrêt du serveur
     process.on('SIGTERM', async () => {
       logger.info('⚠️  Signal SIGTERM reçu: fermeture du serveur...');
+      await transformationWorker.close();
       await closeDatabases();
       process.exit(0);
     });
 
     process.on('SIGINT', async () => {
       logger.info('⚠️  Signal SIGINT reçu: fermeture du serveur...');
+      await transformationWorker.close();
       await closeDatabases();
       process.exit(0);
     });
