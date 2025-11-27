@@ -247,4 +247,16 @@ export class PhotoRepository implements IPhotoRepository {
       throw error;
     }
   }
+
+  /**
+   * Compter le nombre total de photos
+   */
+  async countTotal(): Promise<number> {
+    try {
+      return await PhotoModel.countDocuments();
+    } catch (error: any) {
+      logger.error('❌ Erreur comptage total photos', { error: error.message });
+      return 0;
+    }
+  }
 }

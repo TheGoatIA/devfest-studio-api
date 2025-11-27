@@ -29,4 +29,6 @@ export interface ITransformationRepository {
   updateStatus(transformationId: string, status: string, progress?: number): Promise<void>;
   markAsCompleted(transformationId: string, result: any): Promise<void>;
   markAsFailed(transformationId: string, error: any): Promise<void>;
+  countTotal(): Promise<number>;
+  countByStatus(): Promise<Record<string, number>>;
 }
