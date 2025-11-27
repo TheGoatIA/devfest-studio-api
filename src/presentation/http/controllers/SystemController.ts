@@ -1,5 +1,5 @@
-import { systemStateService } from '@application/services/SystemStateService';
-import logger from '@config/logger';
+import { systemStateService } from '../../../application/services/SystemStateService';
+import logger from '../../../config/logger';
 import { Request, Response } from 'express';
 
 export class SystemController {
