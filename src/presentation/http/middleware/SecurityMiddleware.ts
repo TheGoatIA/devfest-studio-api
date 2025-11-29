@@ -261,8 +261,8 @@ import rateLimit from 'express-rate-limit';
  * Protège l'API contre les attaques par force brute et le spam
  */
 export const apiRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limite chaque IP à 100 requêtes par fenêtre
+  windowMs: config.RATE_LIMIT_WINDOW_MS, // 15 minutes
+  max: config.RATE_LIMIT_MAX_REQUESTS, // Limite chaque IP à 100 requêtes par fenêtre
   standardHeaders: true, // Retourne les headers `RateLimit-*`
   legacyHeaders: false, // Désactive les headers `X-RateLimit-*`
   message: {
