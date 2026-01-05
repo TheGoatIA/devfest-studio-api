@@ -33,7 +33,7 @@
     "@types/swagger-jsdoc": "^6.0.4",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
-    "bullmq": "^5.66.0",
+    "bullmq": "^5.66.4",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
